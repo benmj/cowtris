@@ -468,12 +468,18 @@ function Game () {
         clearInterval(this.intervalID);
         document.getElementById('game_over').style.display = 'block';
         this.gameOver = true;
+        play_sound('gameover');
     };
 
     this.rowCompletionsFinished = function (num_rows_zapped) {
         this.updateLevel(num_rows_zapped);
         this.increaseScore(num_rows_zapped);
         this.increaseRowsCount(num_rows_zapped);
+        if (num_rows_zapped > 1) {
+            play_sound('multirow');
+        } else if (num_rows_zapped == 1) {
+            play_sound('row');
+        }
     };
 
     this.updateLevel = function (num_rows_zapped) {
@@ -551,4 +557,27 @@ function init() {
     };
 
     game.start();
+    play_sound('madcow');
+}
+
+
+// audio
+var channel_max = 10;
+var channels = new Array();
+for (a=0;a<channel_max;a++) {
+    channels[a] = new Array();
+    channels[a]['channel'] = new Audio();
+    channels[a]['finished'] = -1;
+}
+function play_sound(s) {
+    for (a=0;a<channels.length;a++) {
+        thistime = new Date();
+        if (channels[a]['finished'] < thistime.getTime()) {
+            channels[a]['finished'] = thistime.getTime() + document.getElementById('audio_' + s).duration*1000;
+            channels[a]['channel'].src = document.getElementById('audio_' + s).src;
+            channels[a]['channel'].load();
+            channels[a]['channel'].play();
+            break;
+        }
+    }
 }
