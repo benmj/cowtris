@@ -19,7 +19,7 @@ body {
 }
 
 #info_container {
-	background-image: url("resources/images/cowback.png"); 
+	background-image: url("../images/cowback.png"); 
 	background-size: 390px 375px;
 	width: 390;
 	height: 375;
@@ -58,8 +58,8 @@ td {
 #container {
 	margin: 0px auto;
 	background-color: white;
-	height: 440;
-	width: 600;
+	height: 440px;
+	width: 600px;
 	padding: 20px;
 	-moz-box-shadow:    inset 0 0 40px #000000;
 	-webkit-box-shadow: inset 0 0 40px #000000;
@@ -69,4 +69,11 @@ td {
 #game_canvas {
 	margin-right: 5px;
 	border: 1px solid;
+}
+
+#menu {
+	width: 600px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 10px;
 }

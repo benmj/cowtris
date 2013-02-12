@@ -533,7 +533,7 @@ function Game () {
     };
 }
 
-function init() {
+function AppInitialize() {
     var game = new Game();
 
     window.onkeydown = function (e) {
@@ -556,7 +556,7 @@ function init() {
         }
     };
 
-    game.start();
+    // game.start();
     play_sound('madcow');
 }
 
