@@ -376,7 +376,7 @@ function Preview () {
 
 function Game () {
     this.interval = 1000 * (0.5 - 0.0472);
-    this.intervalID = null;
+    this.gameTimer = null;
     this.dropIntervalID = null;
     this.piece = new Cow(Math.floor(Math.random() * 7));
     this.nextPiece = new Cow(Math.floor(Math.random() * 7));
@@ -389,6 +389,9 @@ function Game () {
     this.board = new Board();
     this.oldBoard = new Board();
     this.preview = new Preview();
+    this.pausedInterval = null;
+    this.startLevel = 0;
+    this.startRows = 0;
 
     this.start = function () {
         this.gameInProgress = true;
@@ -398,11 +401,11 @@ function Game () {
         this.board.drawCow(this.piece);
         this.preview.drawCow(this.nextPiece);
 
-        this.intervalID = setInterval( (function(self) {
+        this.gameTimer = $.timer(function(self) {
             return function () {
                 self.advancePiece();
             };
-        }(this)), this.interval);
+        }(this), this.interval, true);
     };
 
     this.clearDrop = function () {
@@ -413,7 +416,7 @@ function Game () {
         var provisional = this.piece.clone();
         provisional.advance();
 
-        if ( this.board.isConflicted(provisional) ) {
+        if (this.board.isConflicted(provisional)) {
             this.board.addToBoard(this.piece);
             this.newPiece();
         } else {
@@ -465,7 +468,7 @@ function Game () {
     };
 
     this.gameOver = function () {
-        clearInterval(this.intervalID);
+        this.gameTimer.stop();
         document.getElementById('game_over').style.display = 'block';
         this.gameOver = true;
         play_sound('gameover');
@@ -486,15 +489,15 @@ function Game () {
         if(Math.floor(((this.rows + num_rows_zapped) / 10)) == this.level + 1) {
             this.level += 1;
 
-            clearInterval(this.intervalID);
+            this.gameTimer.stop()
 
             this.interval = 1000 * (0.5 - (0.0472 * this.level) );
 
-            this.intervalID = setInterval( (function(self) {
+            this.gameTimer = $.timer(function(self) {
                 return function () {
                     self.advancePiece();
                 };
-            }(this)), this.interval);
+            }(this), this.interval, true);
 
             document.getElementById('level').innerText = String(this.level);
         }
@@ -531,11 +534,21 @@ function Game () {
             this.board.drawCow(this.piece);
         }
     };
+
+    this.pause = function () {
+        $('#paused').toggle();
+        this.gameTimer.toggle();
+    };
+
+    this.newGame = function () {
+        console.log('New Game!');
+    };
 }
 
 function AppInitialize() {
     var game = new Game();
 
+    // key presses
     window.onkeydown = function (e) {
         switch(e.keyCode) {
             case 32: // space
@@ -553,10 +566,40 @@ function AppInitialize() {
             case 40: // down
                 game.advancePiece();
                 break;
+            case 78:
+                game.newGame();
+                break;
+            case 80: // 'p'
+                game.pause();
+                break;
         }
     };
 
-    // game.start();
+    // menu selectors
+    $('#pauseAction').click(function(event) {
+        event.preventDefault();
+        game.pause();
+    });
+
+    $('#newGameAction').click(function(event) {
+        event.preventDefault();
+        game.newGame();
+    });
+
+    $('#startingLevel').change(function(event) {
+        game.startingLevel = $(this).val();
+        console.log(game.startingLevel);
+    });
+
+    // THIS GIVES DESIRED EFFECT WHEN CLICKING MENU, BUT NOT WHEN CLICKING OFF
+
+    // $(window).focusout(function(e) {
+    //     game.pause();
+    // }).focusin(function(e) {
+    //     game.pause();
+    // });
+
+    game.start();
     play_sound('madcow');
 }
 
