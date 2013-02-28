@@ -2,6 +2,8 @@
 /*global Image: true */
 /*global document: true */
 /*global window: true */
+/*global $: true */
+/*global Audio: true */
 /*jslint es5: true */
 
 /*
@@ -91,6 +93,29 @@ CowMap.src = './resources/images/source.png';
 var NextCows = new Image();
 NextCows.src = './resources/images/next.png';
 
+// audio
+var channel_max = 10;
+var channels = [];
+var a;
+for (a = 0; a < channel_max; a += 1) {
+    channels[a] = [];
+    channels[a].channel = new Audio();
+    channels[a].finished = -1;
+}
+
+function play_sound(s) {
+    for (a = 0; a < channels.length; a+=1) {
+        var thistime = new Date();
+        if (channels[a].finished < thistime.getTime()) {
+            channels[a].finished = thistime.getTime() + document.getElementById('audio_' + s).duration*1000;
+            channels[a].channel.src = document.getElementById('audio_' + s).src;
+            channels[a].channel.load();
+            channels[a].channel.play();
+            break;
+        }
+    }
+}
+
 function Point (x, y) {
     this.x = x;
     this.y = y;
@@ -134,17 +159,14 @@ function Cow(breed) {
     };
 
     this.move_right = function () {
-
         this.center = new Point(this.center.x + 1, this.center.y);
     };
 
     this.move_left = function () {
-
         this.center = new Point(this.center.x - 1, this.center.y);
     };
 
     this.advance = function () {
-
         this.center = new Point(this.center.x, this.center.y + 1);
     };
 
@@ -278,7 +300,7 @@ var Board = function () {
         var full_rows = [],
             row_num,
             recurse = false,
-            num_zapped = Num_Zapped | 0;
+            num_zapped = Num_Zapped || 0;
 
         for (row_num = 0; row_num < this.board.length; row_num++) {
             var col_num = this.board[row_num].length, sum = 0;
@@ -375,38 +397,25 @@ function Preview () {
 }
 
 function Game () {
-    this.interval = 1000 * (0.5 - 0.0472);
-    this.gameTimer = null;
+    this.interval = null;
+    this.piece = null;
+    this.nextPiece = null;
     this.dropIntervalID = null;
-    this.piece = new Cow(Math.floor(Math.random() * 7));
-    this.nextPiece = new Cow(Math.floor(Math.random() * 7));
-    this.gameInProgress = false;
     this.gamePaused = false;
-    this.gameOver = false;
     this.score = 0;
     this.rows = 0;
-    this.level = 0;
-    this.board = new Board();
-    this.oldBoard = new Board();
-    this.preview = new Preview();
+    this.board = null;
+    this.oldBoard = null;
+    this.preview = null;
     this.pausedInterval = null;
+    this.level = 0;
     this.startLevel = 0;
     this.startRows = 0;
-
-    this.start = function () {
-        this.gameInProgress = true;
-
-        this.board.parent = this;
-
-        this.board.drawCow(this.piece);
-        this.preview.drawCow(this.nextPiece);
-
-        this.gameTimer = $.timer(function(self) {
-            return function () {
-                self.advancePiece();
-            };
-        }(this), this.interval, true);
-    };
+    this.gameTimer = $.timer((function(self) {
+        return function () {
+            self.advancePiece();
+        };
+    }(this)));
 
     this.clearDrop = function () {
         clearInterval(this.dropIntervalID);
@@ -460,7 +469,7 @@ function Game () {
         var provisional = this.piece.clone();
         provisional.rotate();
 
-        if ( !this.board.isConflicted(provisional) ) {
+        if (!this.board.isConflicted(provisional)) {
             this.board.eraseCow(this.piece);
             this.piece.rotate();
             this.board.drawCow(this.piece);
@@ -469,8 +478,7 @@ function Game () {
 
     this.gameOver = function () {
         this.gameTimer.stop();
-        document.getElementById('game_over').style.display = 'block';
-        this.gameOver = true;
+        $('#game_over').show();
         play_sound('gameover');
     };
 
@@ -480,42 +488,36 @@ function Game () {
         this.increaseRowsCount(num_rows_zapped);
         if (num_rows_zapped > 1) {
             play_sound('multirow');
-        } else if (num_rows_zapped == 1) {
+        } else if (num_rows_zapped === 1) {
             play_sound('row');
         }
     };
 
     this.updateLevel = function (num_rows_zapped) {
-        if(Math.floor(((this.rows + num_rows_zapped) / 10)) == this.level + 1) {
+        if(Math.floor(((this.rows + num_rows_zapped) / 10)) === this.level + 1) {
             this.level += 1;
 
-            this.gameTimer.stop()
+            this.interval = 1000 * (0.5 - (0.0472 * this.level));
 
-            this.interval = 1000 * (0.5 - (0.0472 * this.level) );
+            this.gameTimer.set({ time: this.interval });
 
-            this.gameTimer = $.timer(function(self) {
-                return function () {
-                    self.advancePiece();
-                };
-            }(this), this.interval, true);
-
-            document.getElementById('level').innerText = String(this.level);
+            $('#level').text(this.level);
         }
     };
 
     this.increaseRowsCount = function (num_rows_zapped) {
         this.rows = this.rows + num_rows_zapped;
-        document.getElementById('rows').innerText = String(this.rows);
+        $('#rows').text(this.rows);
     };
 
     this.increaseScore = function (num_rows_zapped) {
-        if (num_rows_zapped == 1) {
+        if (num_rows_zapped === 1) {
             this.score += 50 * (this.level + 1);
-        } else if (num_rows_zapped == 2) {
+        } else if (num_rows_zapped === 2) {
             this.score += 150 * (this.level + 1);
-        } else if (num_rows_zapped == 3) {
+        } else if (num_rows_zapped === 3) {
             this.score += 500 * (this.level + 1);
-        } else if (num_rows_zapped == 4) {
+        } else if (num_rows_zapped === 4) {
             this.score += 1000 * (this.level + 1);
         }
         document.getElementById('score').innerText = String(this.score);
@@ -541,7 +543,25 @@ function Game () {
     };
 
     this.newGame = function () {
-        console.log('New Game!');
+        this.level = this.startLevel;
+        this.interval = 1000 * (0.5 - (0.0472 * this.level));
+        this.piece = new Cow(Math.floor(Math.random() * 7));
+        this.nextPiece = new Cow(Math.floor(Math.random() * 7));
+        this.board = new Board();
+        this.oldBoard = new Board();
+        this.preview = new Preview();
+        this.board.parent = this;
+        this.board.drawCow(this.piece);
+        this.preview.drawCow(this.nextPiece);
+        this.score = 0;
+        this.rows = 0;
+
+        this.gameTimer.set({ time: this.interval, autostart: true });
+
+        $('#game_over').hide();
+        $('#level').text(this.level);
+        $('#score').text(this.score);
+        $('#rows').text(this.rows);
     };
 }
 
@@ -587,8 +607,7 @@ function AppInitialize() {
     });
 
     $('#startingLevel').change(function(event) {
-        game.startingLevel = $(this).val();
-        console.log(game.startingLevel);
+        game.startLevel = parseInt($(this).val(), 10);
     });
 
     // THIS GIVES DESIRED EFFECT WHEN CLICKING MENU, BUT NOT WHEN CLICKING OFF
@@ -599,28 +618,6 @@ function AppInitialize() {
     //     game.pause();
     // });
 
-    game.start();
+    game.newGame();
     play_sound('madcow');
-}
-
-
-// audio
-var channel_max = 10;
-var channels = new Array();
-for (a=0;a<channel_max;a++) {
-    channels[a] = new Array();
-    channels[a]['channel'] = new Audio();
-    channels[a]['finished'] = -1;
-}
-function play_sound(s) {
-    for (a=0;a<channels.length;a++) {
-        thistime = new Date();
-        if (channels[a]['finished'] < thistime.getTime()) {
-            channels[a]['finished'] = thistime.getTime() + document.getElementById('audio_' + s).duration*1000;
-            channels[a]['channel'].src = document.getElementById('audio_' + s).src;
-            channels[a]['channel'].load();
-            channels[a]['channel'].play();
-            break;
-        }
-    }
 }
