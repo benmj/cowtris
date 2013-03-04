@@ -5,6 +5,7 @@
 /*global $: true */
 /*global Audio: true */
 /*jslint es5: true */
+/*global localStorage: true */
 
 /*
  * Copyright 2012-2013 by Ben Jacobs <benmillerj@gmail.com>. Released under the
@@ -66,7 +67,7 @@ var Breeds = {
     };
 
 // NAME, SCORE, NUMBER OF ROWS
-var DefaultHighscores = [
+var DefaultHighScores = [
     ['The Mad Cow', 200000, 220],
     ['Bob', 175000, 205],
     ['Holy Cow!', 150000, 190],
@@ -416,6 +417,28 @@ function Game () {
             self.advancePiece();
         };
     }(this)));
+    this.highScores = (function () {
+      var highScores = [];
+      if (localStorage.highscores) {
+        highScores = JSON.parse(localStorage.highScores);
+      } else {
+        highScores = DefaultHighScores;
+        localStorage.highScores = JSON.stringify(highScores);
+      }
+      return highScores;
+    }());
+    this.drawHighScoreTable = (function (self) {
+      var tb = $('#highScoreModal table > tbody'), bod = '';
+      $(self.highScores).each(function(index, row) {
+        var tr = '<td>' + (index + 1) + '</td>';
+        $(row).each(function(i, cell) {
+          tr = tr + '<td>' + cell + '</td>';
+        });
+        tr = '<tr>' + tr + '</tr>';
+        bod = bod + tr;
+      });
+      $(tb).html(bod);
+    }(this));
 
     this.clearDrop = function () {
         clearInterval(this.dropIntervalID);
@@ -563,6 +586,10 @@ function Game () {
         $('#score').text(this.score);
         $('#rows').text(this.rows);
     };
+
+    this.getHighScores = function () {
+
+    };
 }
 
 function AppInitialize() {
@@ -596,17 +623,17 @@ function AppInitialize() {
     };
 
     // menu selectors
-    $('#pauseAction').click(function(event) {
+    $('#pauseAction').click(function (event) {
         event.preventDefault();
         game.pause();
     });
 
-    $('#newGameAction').click(function(event) {
+    $('#newGameAction').click(function (event) {
         event.preventDefault();
         game.newGame();
     });
 
-    $('#startingLevel').change(function(event) {
+    $('#startingLevel').change(function (event) {
         game.startLevel = parseInt($(this).val(), 10);
     });
 

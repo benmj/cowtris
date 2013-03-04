@@ -81,3 +81,7 @@ td {
 	margin-right: auto;
 	padding: 10px;
 }
+
+#highScoreModal .modal-body {
+	max-height: none;
+}
