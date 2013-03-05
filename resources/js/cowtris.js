@@ -419,7 +419,7 @@ function Game () {
     }(this)));
     this.highScores = (function () {
       var highScores = [];
-      if (localStorage.highscores) {
+      if (JSON.parse(localStorage.highScores)) {
         highScores = JSON.parse(localStorage.highScores);
       } else {
         highScores = DefaultHighScores;
@@ -427,9 +427,9 @@ function Game () {
       }
       return highScores;
     }());
-    this.drawHighScoreTable = (function (self) {
+    this.drawHighScoreTable = function () {
       var tb = $('#highScoreModal table > tbody'), bod = '';
-      $(self.highScores).each(function(index, row) {
+      $(this.highScores).each(function(index, row) {
         var tr = '<td>' + (index + 1) + '</td>';
         $(row).each(function(i, cell) {
           tr = tr + '<td>' + cell + '</td>';
@@ -438,7 +438,8 @@ function Game () {
         bod = bod + tr;
       });
       $(tb).html(bod);
-    }(this));
+    };
+    this.drawHighScoreTable();
 
     this.clearDrop = function () {
         clearInterval(this.dropIntervalID);
@@ -470,22 +471,22 @@ function Game () {
     };
 
     this.movePieceLeft = function () {
-        var provisional = this.piece.clone();
-        provisional.move_left();
+      var provisional = this.piece.clone();
+      provisional.move_left();
 
-        if (!this.board.isConflicted(provisional)) {
-            this.board.eraseCow(this.piece);
-            this.piece.move_left();
-            this.board.drawCow(this.piece);
-        }
+      if (!this.board.isConflicted(provisional)) {
+        this.board.eraseCow(this.piece);
+        this.piece.move_left();
+        this.board.drawCow(this.piece);
+      }
     };
 
     this.dropPiece = function () {
-        this.dropIntervalID = setInterval( (function(self) {
-            return function () {
-                self.advancePiece();
-            };
-        }(this)), 10);
+      this.dropIntervalID = setInterval( (function(self) {
+        return function () {
+          self.advancePiece();
+        };
+      }(this)), 10);
     };
 
     this.rotatePiece = function () {
@@ -503,6 +504,7 @@ function Game () {
         this.gameTimer.stop();
         $('#game_over').show();
         play_sound('gameover');
+        this.checkIfHighScore();
     };
 
     this.rowCompletionsFinished = function (num_rows_zapped) {
@@ -587,8 +589,34 @@ function Game () {
         $('#rows').text(this.rows);
     };
 
-    this.getHighScores = function () {
+    this.checkIfHighScore = function () {
+      var newHS = [],
+        newIndex = -1,
+        newScore = ['', this.score, this.rows],
+        alreadyAdded = false;
 
+      $(this.highScores).each(function(index,value) {
+        if (newScore[1] > value[1] && !alreadyAdded) {
+          newHS.push(newScore);
+          newIndex = index + 1;
+          alreadyAdded = true;
+        }
+        newHS.push(value);
+      });
+      newHS.pop();
+
+      if (newHS !== this.highScores) {
+        this.highScores = newHS;
+        this.drawHighScoreTable();
+        $('#highScoreModal tbody').find('tr:nth-child(' + newIndex + ')')
+          .find('td:nth-child(2)')
+          .html('<input type="text" />');
+      }
+
+      $('#highScoreModal').modal('show');
+      $('#highScoreModal').on('shown', function () {
+        $('#highScoreModal input').focus();
+      });
     };
 }
 
