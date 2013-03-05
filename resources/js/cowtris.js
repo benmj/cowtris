@@ -402,7 +402,6 @@ function Game () {
     this.piece = null;
     this.nextPiece = null;
     this.dropIntervalID = null;
-    this.gamePaused = false;
     this.score = 0;
     this.rows = 0;
     this.board = null;
@@ -419,11 +418,11 @@ function Game () {
     }(this)));
     this.highScores = (function () {
       var highScores = [];
-      if (JSON.parse(localStorage.highScores)) {
-        highScores = JSON.parse(localStorage.highScores);
-      } else {
+      if (!localStorage.highScores) {
         highScores = DefaultHighScores;
         localStorage.highScores = JSON.stringify(highScores);
+      } else if (JSON.parse(localStorage.highScores)) {
+        highScores = JSON.parse(localStorage.highScores);
       }
       return highScores;
     }());
@@ -446,6 +445,10 @@ function Game () {
     };
 
     this.advancePiece = function () {
+        if (!this.gameTimer.isActive) {
+            return;
+        }
+
         var provisional = this.piece.clone();
         provisional.advance();
 
@@ -459,7 +462,18 @@ function Game () {
         }
     };
 
+    this.newGamePressed = function () {
+        if (!this.gameTimer.isActive) {
+            return;
+        }
+        this.newGame();
+    };
+
     this.movePieceRight = function () {
+        if (!this.gameTimer.isActive) {
+            return;
+        }
+
         var provisional = this.piece.clone();
         provisional.move_right();
 
@@ -471,25 +485,37 @@ function Game () {
     };
 
     this.movePieceLeft = function () {
-      var provisional = this.piece.clone();
-      provisional.move_left();
+        if (!this.gameTimer.isActive) {
+            return;
+        }
 
-      if (!this.board.isConflicted(provisional)) {
-        this.board.eraseCow(this.piece);
-        this.piece.move_left();
-        this.board.drawCow(this.piece);
-      }
+        var provisional = this.piece.clone();
+        provisional.move_left();
+
+        if (!this.board.isConflicted(provisional)) {
+            this.board.eraseCow(this.piece);
+            this.piece.move_left();
+            this.board.drawCow(this.piece);
+        }
     };
 
     this.dropPiece = function () {
-      this.dropIntervalID = setInterval( (function(self) {
-        return function () {
-          self.advancePiece();
-        };
+        if (!this.gameTimer.isActive) {
+            return;
+        }
+
+        this.dropIntervalID = setInterval( (function(self) {
+            return function () {
+              self.advancePiece();
+          };
       }(this)), 10);
     };
 
     this.rotatePiece = function () {
+        if (!this.gameTimer.isActive) {
+            return;
+        }
+
         var provisional = this.piece.clone();
         provisional.rotate();
 
@@ -563,6 +589,9 @@ function Game () {
     };
 
     this.pause = function () {
+        if (!this.gameTimer.isActive) {
+            return;
+        }
         $('#paused').toggle();
         this.gameTimer.toggle();
     };
@@ -593,9 +622,10 @@ function Game () {
       var newHS = [],
         newIndex = -1,
         newScore = ['', this.score, this.rows],
-        alreadyAdded = false;
+        alreadyAdded = false,
+        self = this;
 
-      $(this.highScores).each(function(index,value) {
+      $(self.highScores).each(function(index,value) {
         if (newScore[1] > value[1] && !alreadyAdded) {
           newHS.push(newScore);
           newIndex = index + 1;
@@ -605,9 +635,9 @@ function Game () {
       });
       newHS.pop();
 
-      if (newHS !== this.highScores) {
-        this.highScores = newHS;
-        this.drawHighScoreTable();
+      if (newHS !== self.highScores) {
+        self.highScores = newHS;
+        self.drawHighScoreTable();
         $('#highScoreModal tbody').find('tr:nth-child(' + newIndex + ')')
           .find('td:nth-child(2)')
           .html('<input type="text" />');
@@ -615,7 +645,13 @@ function Game () {
 
       $('#highScoreModal').modal('show');
       $('#highScoreModal').on('shown', function () {
-        $('#highScoreModal input').focus();
+        $('#highScoreModal input')
+          .focus()
+          .on('blur', function(event) {
+            self.highScores[newIndex - 1][0] = $(this).val();
+            self.drawHighScoreTable();
+            localStorage.highScores = JSON.stringify(self.highScores);
+          });
       });
     };
 }
@@ -642,7 +678,7 @@ function AppInitialize() {
                 game.advancePiece();
                 break;
             case 78:
-                game.newGame();
+                game.newGamePressed();
                 break;
             case 80: // 'p'
                 game.pause();
