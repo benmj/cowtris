@@ -4,7 +4,7 @@ Cowtris is a falling block game with cows. Versions 1 and 2 of the game were wri
 
 See readme-2.1.md for the original description.
 
-The original game was coded by David Glick (davisagli) and published by Nonsense Software. If you dig into the annals of history, you'll find that NS was four teenagers from Indiana who made computer games, biked, and built model recreations of medieval weaponry.
+The original game was coded by David Glick (davisagli) and published by Nonsense Software. If you dig into the annals of history, you'll find that NS was four teenagers from Indiana who made computer games, biked, and built model recreations of medieval weaponry. In terms of games, Cowtris was their finest work and its legacy casts the longest shadow.
 
 ## Screenshot
 
