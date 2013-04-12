@@ -8,7 +8,9 @@ The original game was coded by David Glick (davisagli) and published by Nonsense
 
 ## Installation / Play
 
-To play the game, you'll need to check out a copy of the repository (or download the ZIP file). You can then open the `index.html` file in your web browser. *NOTE:* the high score functions will only work if you serve the files from a web server.
+To play the game, you'll need to check out a copy of the repository (or download the ZIP file). You can then open the `index.html` file in your web browser. 
+
+*NOTE:* Due to limitations in the browser's `localstorage`, high score functions will only work if you serve the files from a web server.
 
 I'll put this online somewhere soon so you don't have to go through these steps. Promise.
 
