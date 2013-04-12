@@ -8,6 +8,8 @@ The original game was coded by David Glick (davisagli) and published by Nonsense
 
 ## Installation / Play
 
+As of 2013-04-11 you can <a href="http://blog.benbybenjacobs.com/cowtris">play online</a>!
+
 To play the game, you'll need to check out a copy of the repository (or download the ZIP file). You can then open the `index.html` file in your web browser. 
 
 *NOTE:* Due to limitations in the browser's `localstorage`, high score functions will only work if you serve the files from a web server.
