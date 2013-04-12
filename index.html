@@ -7,6 +7,12 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+
+    <!-- game specific -->    
+    <link rel="stylesheet" type="text/css" href="resources/styles/main.css">
+    <link rel="stylesheet" type="text/css" href="resources/vendor/bootstrap/css/bootstrap.css">
+
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -31,32 +37,191 @@
         <hr>
 
         <section id="main_content">
-          <h3>Welcome to GitHub Pages.</h3>
+         
+        <div id="menu">
+                <div class="navbar navbar-static">
+                    <div class="navbar-inner">
+                        <div class="container" style="width: auto;">
+                            <a class="brand" href="#">Cowtris 3</a>
+                            <ul class="nav" role="navigation">
+                                <li class="dropdown">
+                                    <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">Game <b class="caret"></b></a>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
+                                        <li role="presentation">
+                                            <a role="menuitem" tabindex="-1" href="#" id="newGameAction">New Game</a>
+                                        </li>
+                                        <li role="presentation">
+                                            <a role="menuitem" tabindex="-1" href="#" id="pauseAction">Pause Game</a>
+                                        </li>
+                                        <li role="presentation">
+                                            <a role="menuitem" tabindex="-1" href="#">End Game</a>
+                                        </li>
+                                        <li role="presentation">
+                                            <a role="menuitem" tabindex="-1" href="#highScoreModal" role="button" data-toggle="modal">High Scores</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#optionsModal" role="button" data-toggle="modal">Options</a>
+                                </li>
+                            </ul>
+                            <ul class="nav pull-right">
+                                <li>
+                                    <a href="#aboutModal" role="button" data-toggle="modal">About</a>
+                                </li>
+                            </ul>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div id="aboutModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                <h3 id="aboutModalLabel">
+                    Cowtris 3
+                </h3>
+            </div>
+            <div class="modal-body">
+                <h4>
+                    About
+                </h4>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                </p>
+                <h4>
+                    Story
+                </h4>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                </p>
+                <h4>
+                    Credits
+                </h4>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+            </div>
+        </div>
+        <div id="optionsModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="optionsModalLabel" aria-hidden="true">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                <h3 id="optionsModalLabel">
+                    Game Options
+                </h3>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <form>
+                        <label for="StartingLevel">Starting Level</label>
+                        <select name="StartingLevel" id="startingLevel">
+                            <option>0</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                        </select>
+                        <label for="StartingRows">Starting Rows</label>
+                        <select name="StartingRows" id="startingRows">
+                            <option>0</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                        </select>
+                    </form>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Ok</button>
+            </div>
+        </div>
+        <div id="highScoreModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="highScoreModalLabel" aria-hidden="true">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                <h3 id="highScoreModalLabel">
+                    High Scores
+                </h3>
+            </div>
+            <div class="modal-body">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Score</th>
+                            <th>Rows</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+            </div>
+        </div>
+        <div class="overlays">
+            <div id="game_over" class="message">
+                game over
+            </div>
+            <div id="paused" class="message">
+                paused
+            </div>
+        </div>
+        <div id="container">
+            <div id="left">
+                <canvas id="game_canvas" width="200" height="440"></canvas>
+            </div>
+            <div id="right">
+                <img id="title" src="./resources/images/title.png">
+                <div id="info_container">
+                    <table>
+                        <tr>
+                            <td>
+                                Score
+                            </td>
+                            <td id="score">
+                                0
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Rows
+                            </td>
+                            <td id="rows">
+                                0
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Level
+                            </td>
+                            <td id="level">
+                                1
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Next
+                            </td>
+                            <td id="next">
+                                <canvas id="preview" width="84" height="52"></canvas><br>
+                                <span id="preview_name"></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
         </section>
 
         <footer>
@@ -77,5 +242,18 @@ $ git checkout gh-pages
 
       </div>
     </div>
+
+
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script type="text/javascript" src="resources/vendor/jquery.timer.js"></script>
+        <script type="text/javascript" src="resources/vendor/bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="resources/js/cowtris.js"></script>
+        <script type="text/javascript" src="resources/js/selectors.js"></script>
+
+        <audio id="audio_madcow" src="resources/sounds/madcow.wav" preload="auto"> 
+        <audio id="audio_row" src="resources/sounds/Zap.wav" preload="auto"> 
+        <audio id="audio_multirow" src="resources/sounds/Zap2.wav" preload="auto"> 
+        <audio id="audio_gameover" src="resources/sounds/Die.wav" preload="auto">
+
   </body>
 </html>
