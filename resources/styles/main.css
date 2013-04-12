@@ -66,8 +66,28 @@ td {
 	box-shadow:         inset 0 0 40px #000000;
 }
 
-#menu { 
-	width: 600px;
+footer,
+header {
+	margin: 0px auto;
+	width: 680px;
+}
+
+header {
+	border-bottom: 1px solid LightGrey;
+}
+
+footer {
+	margin-top: 50px;
+}
+
+header h1,
+header h3 {
+	line-height: 20px;
+}
+
+header h3 {
+	padding-left: 15px;
+	color: grey;
 }
 
 #game_canvas {
@@ -79,9 +99,16 @@ td {
 	width: 600px;
 	margin-left: auto;
 	margin-right: auto;
-	padding: 10px;
+}
+
+#menu ul li {
+	display: inline;
 }
 
 #highScoreModal .modal-body {
 	max-height: none;
+}
+
+.nav {
+	padding-top: 10px;
 }
