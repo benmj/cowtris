@@ -660,7 +660,8 @@ function AppInitialize() {
     var game = new Game();
 
     // key presses
-    window.onkeydown = function (e) {
+    $('body').keydown(function (e) {
+        e.preventDefault();
         switch(e.keyCode) {
             case 32: // space
                 game.dropPiece();
@@ -684,7 +685,7 @@ function AppInitialize() {
                 game.pause();
                 break;
         }
-    };
+    });
 
     // menu selectors
     $('#pauseAction').click(function (event) {
