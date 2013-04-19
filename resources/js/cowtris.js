@@ -398,6 +398,7 @@ function Preview () {
 }
 
 function Game () {
+    this.playing = false;
     this.interval = null;
     this.piece = null;
     this.nextPiece = null;
@@ -528,6 +529,7 @@ function Game () {
 
     this.gameOver = function () {
         this.gameTimer.stop();
+        this.playing = false;
         $('#game_over').show();
         play_sound('gameover');
         this.checkIfHighScore();
@@ -589,7 +591,7 @@ function Game () {
     };
 
     this.pause = function () {
-        if (!this.gameTimer.isActive) {
+        if (!this.playing) {
             return;
         }
         $('#paused').toggle();
@@ -597,6 +599,7 @@ function Game () {
     };
 
     this.newGame = function () {
+        this.playing = true;
         this.level = this.startLevel;
         this.interval = 1000 * (0.5 - (0.0472 * this.level));
         this.piece = new Cow(Math.floor(Math.random() * 7));
@@ -612,6 +615,7 @@ function Game () {
 
         this.gameTimer.set({ time: this.interval, autostart: true });
 
+        $('#paused').hide();
         $('#game_over').hide();
         $('#level').text(this.level);
         $('#score').text(this.score);
