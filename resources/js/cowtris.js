@@ -665,27 +665,33 @@ function AppInitialize() {
 
     // key presses
     $('body').keydown(function (e) {
-        e.preventDefault();
         switch(e.keyCode) {
             case 32: // space
+                e.preventDefault();
                 game.dropPiece();
                 break;
             case 37: // left
+                e.preventDefault();
                 game.movePieceLeft();
                 break;
             case 38:
+                e.preventDefault();
                 game.rotatePiece();
                 break;
             case 39: // right
+                e.preventDefault();
                 game.movePieceRight();
                 break;
             case 40: // down
+                e.preventDefault();
                 game.advancePiece();
                 break;
             case 78:
+                e.preventDefault();
                 game.newGamePressed();
                 break;
             case 80: // 'p'
+                e.preventDefault();
                 game.pause();
                 break;
         }
