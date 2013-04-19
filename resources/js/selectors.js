@@ -1,5 +1,5 @@
 /*global AppInitialize: false */
 
-$(function() {
+$(window).load(function() {
 	AppInitialize();
 });
