@@ -325,6 +325,7 @@
       justify-content: center;
       border-radius: 4px;
       z-index: 10;
+      overflow: visible;
     }
 
     .overlay.active { display: flex; }
@@ -336,6 +337,7 @@
       padding: 1.25rem 1.5rem;
       text-align: center;
       max-width: 220px;
+      min-width: 180px;
     }
 
     .overlay-box h3 {
@@ -395,6 +397,13 @@
       /* Board: height-driven so the canvas + side panel fit together */
       .board-col { flex-shrink: 0; }
       .board-wrap { max-width: 100%; }
+
+      /* Make overlays viewport-centered on mobile so they're always usable */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        border-radius: 0;
+      }
 
       canvas#game {
         width: auto !important;
@@ -1221,13 +1230,21 @@
 
   // ── Score Submission ──
   document.getElementById('submitScoreBtn').addEventListener('click', submitScore);
+  document.getElementById('submitScoreBtn').addEventListener('touchend', (e) => {
+    e.preventDefault();
+    submitScore();
+  });
 
+  let submitting = false;
   async function submitScore() {
+    if (submitting) return;
+    submitting = true;
     const name = document.getElementById('nameInput').value.trim() || 'Anonymous';
     localStorage.setItem('cowtris_name', name);
 
     if (score === 0) {
       hideOverlays();
+      submitting = false;
       return;
     }
 
@@ -1248,6 +1265,7 @@
     }
 
     hideOverlays();
+    submitting = false;
   }
 
   // ── Scoreboard ──
