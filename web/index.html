@@ -631,10 +631,10 @@
 
     /* ── Mobile: side-by-side with compact info ── */
     @media (max-width: 520px) {
-      .page { padding: 0.5rem 0.75rem 1.5rem; max-width: 100%; box-sizing: border-box; }
-      .back { margin-bottom: 0.25rem; font-size: 0.7rem; }
-      .title-img { max-width: 120px; margin-bottom: 0; }
-      .subtitle { font-size: 0.7rem; margin-bottom: 0.35rem; }
+      .page { padding: 0.35rem 0.5rem 0.5rem; max-width: 100%; box-sizing: border-box; }
+      .back { margin-bottom: 0.15rem; font-size: 0.65rem; }
+      .title-img { max-width: 100px; margin-bottom: 0; }
+      .subtitle { font-size: 0.65rem; margin-bottom: 0.2rem; }
 
       /* Keep side-by-side layout on mobile */
       .game-wrap {
@@ -660,18 +660,19 @@
 
       canvas#game {
         width: auto !important;
-        height: calc(100vh - 310px) !important;
-        height: calc(100svh - 290px) !important;
-        max-height: 440px;
-        min-height: 120px;
+        height: calc(100vh - 270px) !important;
+        height: calc(100svh - 250px) !important;
+        height: calc(100dvh - 250px) !important;
+        max-height: 520px;
+        min-height: 180px;
         aspect-ratio: 10 / 22;
-        max-width: calc(100vw - 150px);
+        max-width: calc(100vw - 145px);
       }
 
       /* Compact side column for mobile — fixed width so layout doesn't shift */
       .side-col {
-        width: 120px;
-        min-width: 120px;
+        width: 115px;
+        min-width: 115px;
         flex: none;
         gap: 0;
       }
@@ -741,41 +742,49 @@
         order: 2;
       }
 
-      .btn-row { margin: 0.35rem 0 0; }
-      .btn { padding: 0.35rem 0.25rem; font-size: 0.65rem; }
+      .btn-row { margin: 0.25rem 0 0; }
+      .btn { padding: 0.3rem 0.2rem; font-size: 0.6rem; }
 
       .controls-hint { display: none; }
       .touch-controls {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.4rem;
-        margin-top: 0.5rem;
+        gap: 0.35rem;
+        margin-top: 0.35rem;
       }
-      .touch-btn { width: 60px; height: 50px; border-radius: 10px; font-size: 1.2rem; }
+      .touch-btn { width: 72px; height: 56px; border-radius: 12px; font-size: 1.5rem; }
       .touch-rotate {
-        width: 196px;
-        height: 50px;
-        font-size: 0.95rem;
+        width: 232px;
+        height: 54px;
+        font-size: 1rem;
         letter-spacing: 0.04em;
       }
       .touch-drop {
-        width: 196px;
-        height: 48px;
-        font-size: 0.9rem;
+        width: 232px;
+        height: 52px;
+        font-size: 1rem;
         letter-spacing: 0.05em;
       }
       .touch-row { gap: 0.5rem; }
 
-      .scoreboard { margin-top: 1.5rem; }
-      footer { margin-top: 1.5rem; }
+      .scoreboard { margin-top: 1rem; }
+      footer { margin-top: 1rem; font-size: 0.6rem; }
     }
 
     /* Very small phones (iPhone SE etc) */
     @media (max-width: 375px) {
-      .touch-btn { width: 54px; height: 46px; font-size: 1.1rem; }
-      .touch-rotate { width: 180px; height: 46px; }
-      .touch-drop { width: 180px; height: 44px; }
+      .touch-btn { width: 64px; height: 52px; font-size: 1.3rem; }
+      .touch-rotate { width: 212px; height: 50px; }
+      .touch-drop { width: 212px; height: 48px; }
+    }
+
+    /* Tall phones (Pro Max, etc) — give the board even more room */
+    @media (max-width: 520px) and (min-height: 800px) {
+      canvas#game {
+        height: calc(100dvh - 260px) !important;
+        max-height: 580px;
+      }
     }
 
     /* Touch devices that are wide enough for side-by-side (tablets) */
