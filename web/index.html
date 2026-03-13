@@ -632,9 +632,19 @@
     /* ── Mobile: side-by-side with compact info ── */
     @media (max-width: 520px) {
       .page { padding: 0.25rem 0.5rem 0.35rem; max-width: 100%; box-sizing: border-box; }
-      .back { display: none; }
-      .title-img { display: none; }
-      .subtitle { display: none; }
+
+      /* Compact single-line header on mobile */
+      .header-row {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 0.2rem;
+        flex-wrap: nowrap;
+        overflow: hidden;
+      }
+      .back { margin-bottom: 0; font-size: 0.55rem; white-space: nowrap; flex-shrink: 0; }
+      .title-img { max-width: 60px; margin-bottom: 0; flex-shrink: 0; }
+      .subtitle { font-size: 0.5rem; margin-bottom: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
       /* Keep side-by-side layout on mobile */
       .game-wrap {
@@ -658,12 +668,12 @@
         border-radius: 0;
       }
 
-      /* Canvas gets maximum vertical space: 100dvh minus touch controls (~200px) and small chrome */
+      /* Canvas: 100dvh minus header(~25px) + btn-row(~22px) + touch controls(~185px) + footer(~18px) + gaps(~10px) = ~260px */
       canvas#game {
         width: auto !important;
-        height: calc(100vh - 230px) !important;
-        height: calc(100svh - 215px) !important;
-        height: calc(100dvh - 215px) !important;
+        height: calc(100vh - 275px) !important;
+        height: calc(100svh - 260px) !important;
+        height: calc(100dvh - 260px) !important;
         max-height: 560px;
         min-height: 200px;
         aspect-ratio: 10 / 22;
@@ -770,7 +780,8 @@
       .touch-row { gap: 0.5rem; }
 
       .scoreboard { margin-top: 0.75rem; }
-      footer { display: none; }
+      footer { margin-top: 0.35rem; font-size: 0.5rem; line-height: 1.3; }
+      footer p:last-child { display: none; }
     }
 
     /* Very small phones (iPhone SE etc) */
@@ -783,7 +794,7 @@
     /* Tall phones (Pro Max, etc) — give the board even more room */
     @media (max-width: 520px) and (min-height: 800px) {
       canvas#game {
-        height: calc(100dvh - 220px) !important;
+        height: calc(100dvh - 265px) !important;
         max-height: 620px;
       }
     }
@@ -874,10 +885,11 @@
 
   <div class="page">
 
-    <a class="back" href="https://benbybenjacobs.com">&larr; benbybenjacobs.com</a>
-
-    <img src="/assets/images/title.png" alt="Cowtris" class="title-img">
-    <p class="subtitle">A falling block game with cows</p>
+    <div class="header-row">
+      <a class="back" href="https://benbybenjacobs.com">&larr; benbybenjacobs.com</a>
+      <img src="/assets/images/title.png" alt="Cowtris" class="title-img">
+      <p class="subtitle">A falling block game with cows</p>
+    </div>
 
     <div class="game-wrap">
       <div class="board-col">
