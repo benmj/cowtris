@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Cowtris &middot; Ben Jacobs</title>
+  <meta name="description" content="A falling block game with cows. Mobile-friendly Tetris variant with cow breeds.">
+  <meta name="author" content="Ben Jacobs">
+  <meta name="date" content="2026-03-13">
+  <meta name="dcterms.created" content="2026-03-13">
+  <meta name="dcterms.modified" content="2026-03-13">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --bg:       #f7f5f0;
+      --bg2:      #eeeae2;
+      --text:     #1a1916;
+      --muted:    #6b6760;
+      --border:   #d8d4cc;
+      --accent:   #c04a1a;
+      --link:     #1a5276;
+      --surface:  #ffffff;
+      --cell-size: 28px;
+    }
+
+    [data-theme="dark"] {
+      --bg:       #141210;
+      --bg2:      #1e1b18;
+      --text:     #e8e4dc;
+      --muted:    #8a8680;
+      --border:   #302c28;
+      --accent:   #e06030;
+      --link:     #7bafd4;
+      --surface:  #1e1b18;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 17px; overflow-x: hidden; }
+
+    body {
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.25s, color 0.25s;
+      min-height: 100vh;
+      touch-action: pan-y;
+      overflow-x: hidden;
+    }
+
+    .toggle {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: border-color 0.2s, background 0.25s, color 0.2s;
+      z-index: 100;
+    }
+    .toggle:hover { border-color: var(--muted); color: var(--text); }
+
+    .page {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    .back {
+      display: inline-block;
+      font-size: 0.825rem;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 1.5rem;
+    }
+    .back:hover { color: var(--accent); }
+
+    /* ── Title image ── */
+    .title-img {
+      display: block;
+      max-width: 300px;
+      height: auto;
+      margin-bottom: 0.15rem;
+      image-rendering: pixelated;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Game Layout ── */
+    .game-wrap {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .board-col { flex-shrink: 0; }
+
+    canvas#game {
+      display: block;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      image-rendering: pixelated;
+    }
+
+    .side-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-width: 160px;
+    }
+
+    /* ── Info panel with cowback background ── */
+    .info-panel {
+      background-image: url('/assets/images/cowback.png');
+      background-size: cover;
+      background-position: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      position: relative;
+    }
+
+    [data-theme="dark"] .info-panel {
+      filter: invert(0.85) hue-rotate(180deg);
+    }
+
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .info-table td {
+      padding: 0.4rem 0.25rem;
+      font-size: 0.85rem;
+      font-weight: bold;
+      font-family: sans-serif;
+      text-align: center;
+    }
+
+    .info-table td:first-child {
+      text-align: left;
+      color: var(--text);
+      white-space: nowrap;
+      padding-right: 0.5rem;
+    }
+
+    .info-table td:last-child {
+      color: maroon;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    [data-theme="dark"] .info-table td:last-child { color: maroon; }
+
+    canvas#preview {
+      display: block;
+      image-rendering: pixelated;
+      margin: 0 auto;
+    }
+
+    .breed-name {
+      font-size: 0.7rem;
+      color: maroon;
+      font-style: italic;
+      text-align: center;
+      margin-top: 0.15rem;
+      white-space: nowrap;
+    }
+
+    /* ── Mobile info strip (hidden on desktop, shown on mobile) ── */
+    .mobile-info {
+      display: none;
+    }
+
+    /* ── Controls ── */
+    .controls-hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 1.25rem;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .controls-hint kbd {
+      display: inline-block;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+      font-family: inherit;
+      font-size: 0.65rem;
+    }
+
+    /* ── Touch Controls ── */
+    .touch-controls {
+      display: none;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .touch-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.1s;
+    }
+    .touch-btn:active { background: var(--bg2); }
+
+    .touch-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.1s;
+    }
+    .btn:hover { border-color: var(--muted); }
+    .btn:active { background: var(--bg2); }
+
+    /* ── Scoreboard ── */
+    .scoreboard {
+      margin-top: 2rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    .scoreboard h2 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    .score-table th {
+      text-align: left;
+      font-weight: 500;
+      color: var(--muted);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .score-table td {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .score-table .rank { color: var(--muted); width: 2rem; }
+    .score-table .score-col { text-align: right; font-variant-numeric: tabular-nums; }
+    .score-table .rows-col { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+    .score-table .highlight td { color: var(--accent); font-weight: 500; }
+
+    .score-empty {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── Game Over Overlay ── */
+    .overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      z-index: 10;
+    }
+
+    .overlay.active { display: flex; }
+
+    .overlay-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+      max-width: 220px;
+    }
+
+    .overlay-box h3 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+
+    .overlay-box p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .overlay-box input {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .overlay-box .btn {
+      width: 100%;
+      flex: none;
+    }
+
+    .board-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* ── Mobile: side-by-side with compact info ── */
+    @media (max-width: 520px) {
+      .page { padding: 0.5rem 0.75rem 1.5rem; max-width: 100%; box-sizing: border-box; }
+      .back { margin-bottom: 0.25rem; font-size: 0.7rem; }
+      .title-img { max-width: 120px; margin-bottom: 0; }
+      .subtitle { font-size: 0.7rem; margin-bottom: 0.35rem; }
+
+      /* Keep side-by-side layout on mobile */
+      .game-wrap {
+        gap: 0.5rem;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      /* Hide the separate mobile info strip — use the side-col instead */
+      .mobile-info { display: none !important; }
+
+      /* Board: height-driven so the canvas + side panel fit together */
+      .board-col { flex-shrink: 0; }
+      .board-wrap { max-width: 100%; }
+
+      canvas#game {
+        width: auto !important;
+        height: calc(100vh - 310px) !important;
+        height: calc(100svh - 290px) !important;
+        max-height: 440px;
+        min-height: 150px;
+        aspect-ratio: 10 / 22;
+      }
+
+      /* Compact side column for mobile */
+      .side-col {
+        min-width: 0;
+        flex: 1;
+        gap: 0;
+      }
+
+      .info-panel {
+        padding: 0.4rem 0.5rem;
+        background-size: 250%;
+      }
+
+      .info-table td {
+        display: block;
+        padding: 0;
+        font-size: 0.7rem;
+      }
+
+      .info-table tr {
+        display: block;
+        margin-bottom: 0.3rem;
+      }
+
+      .info-table td:first-child {
+        font-size: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        font-weight: 500;
+        padding-right: 0;
+        text-align: center;
+      }
+
+      .info-table td:last-child {
+        font-size: 1rem;
+        text-align: center;
+      }
+
+      canvas#preview {
+        width: 100%;
+        max-width: 72px;
+        height: auto;
+        aspect-ratio: 2 / 1;
+      }
+
+      .breed-name { font-size: 0.5rem; }
+
+      .btn-row { margin: 0.35rem 0 0; }
+      .btn { padding: 0.35rem 0.25rem; font-size: 0.65rem; }
+
+      .controls-hint { display: none; }
+      .touch-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+      }
+      .touch-btn { width: 60px; height: 50px; border-radius: 10px; font-size: 1.2rem; }
+      .touch-rotate {
+        width: 196px;
+        height: 50px;
+        font-size: 0.95rem;
+        letter-spacing: 0.04em;
+      }
+      .touch-drop {
+        width: 196px;
+        height: 48px;
+        font-size: 0.9rem;
+        letter-spacing: 0.05em;
+      }
+      .touch-row { gap: 0.5rem; }
+
+      .scoreboard { margin-top: 1.5rem; }
+      footer { margin-top: 1.5rem; }
+    }
+
+    /* Very small phones (iPhone SE etc) */
+    @media (max-width: 375px) {
+      .touch-btn { width: 54px; height: 46px; font-size: 1.1rem; }
+      .touch-rotate { width: 180px; height: 46px; }
+      .touch-drop { width: 180px; height: 44px; }
+    }
+
+    /* Touch devices that are wide enough for side-by-side (tablets) */
+    @media (pointer: coarse) and (min-width: 521px) {
+      .controls-hint { display: none; }
+      .touch-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    footer a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+</head>
+<body>
+
+  <button class="toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">☀︎</button>
+
+  <div class="page">
+
+    <a class="back" href="https://benbybenjacobs.com">&larr; benbybenjacobs.com</a>
+
+    <img src="/assets/images/title.png" alt="Cowtris" class="title-img">
+    <p class="subtitle">A falling block game with cows</p>
+
+    <div class="game-wrap">
+      <div class="board-col">
+        <div class="board-wrap">
+          <canvas id="game"></canvas>
+          <div class="overlay" id="overlayGameOver">
+            <div class="overlay-box">
+              <h3>Game Over</h3>
+              <p id="finalScoreText">Score: 0</p>
+              <input type="text" id="nameInput" placeholder="Your name" maxlength="20" autocomplete="off">
+              <button class="btn" id="submitScoreBtn">Submit Score</button>
+            </div>
+          </div>
+          <div class="overlay" id="overlayPaused">
+            <div class="overlay-box">
+              <h3>Paused</h3>
+              <p>Press <kbd>P</kbd> or tap to resume</p>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="btnNew">New Game</button>
+          <button class="btn" id="btnPause">Pause</button>
+        </div>
+      </div>
+
+      <div class="side-col">
+        <div class="info-panel">
+          <table class="info-table">
+            <tr><td>Score</td><td id="dispScore">0</td></tr>
+            <tr><td>Rows</td><td id="dispRows">0</td></tr>
+            <tr><td>Level</td><td id="dispLevel">0</td></tr>
+            <tr>
+              <td>Next</td>
+              <td>
+                <canvas id="preview" width="80" height="40"></canvas>
+                <div class="breed-name" id="breedName">&nbsp;</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mobile-only: compact info strip below the board -->
+      <div class="mobile-info">
+        <div class="mobile-stats">
+          <div class="stat"><span class="stat-label">Score</span><span class="stat-value" id="dispScoreM">0</span></div>
+          <div class="stat"><span class="stat-label">Rows</span><span class="stat-value" id="dispRowsM">0</span></div>
+          <div class="stat"><span class="stat-label">Level</span><span class="stat-value" id="dispLevelM">0</span></div>
+        </div>
+        <div class="preview-cell">
+          <canvas id="previewM" width="80" height="40"></canvas>
+          <div class="breed-name" id="breedNameM">&nbsp;</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-hint">
+      <kbd>&larr;</kbd> <kbd>&rarr;</kbd> move &nbsp;
+      <kbd>&uarr;</kbd> rotate &nbsp;
+      <kbd>&darr;</kbd> soft drop &nbsp;
+      <kbd>Space</kbd> drop &nbsp;
+      <kbd>P</kbd> pause
+    </div>
+
+    <div class="touch-controls" id="touchControls">
+      <div class="touch-row">
+        <button class="touch-btn touch-rotate" data-action="rotate">&#x21BB; Rotate</button>
+      </div>
+      <div class="touch-row">
+        <button class="touch-btn" data-action="left">&#x25C0;</button>
+        <button class="touch-btn" data-action="down">&#x25BC;</button>
+        <button class="touch-btn" data-action="right">&#x25B6;</button>
+      </div>
+      <div class="touch-row">
+        <button class="touch-btn touch-drop" data-action="drop">DROP</button>
+      </div>
+    </div>
+
+    <div class="scoreboard" id="scoreboard">
+      <h2>High Scores</h2>
+      <div id="scoreContent"><p class="score-empty">Loading...</p></div>
+    </div>
+
+    <footer>
+      <p>
+        Originally written in Java by David Glick (c. 2002), ported to JavaScript by
+        <a href="https://benbybenjacobs.com">Ben Jacobs</a> (2014).
+        Rewritten as a mobile-friendly HTML5 canvas game in 2026 with
+        <a href="https://claude.ai">Claude</a> (Anthropic).
+      </p>
+      <p style="margin-top:0.35rem; font-size:0.65rem;">
+        Every line of this port was generated through a conversational prompt session
+        between Ben and Claude&mdash;layout, game logic, sprite rendering, server, and deploy.
+        <a href="https://github.com/benmj/cowtris">View source on GitHub.</a>
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- Original sound effects -->
+  <audio id="audio_madcow" src="/assets/sounds/madcow.wav" preload="auto"></audio>
+  <audio id="audio_row" src="/assets/sounds/Zap.wav" preload="auto"></audio>
+  <audio id="audio_multirow" src="/assets/sounds/Zap2.wav" preload="auto"></audio>
+  <audio id="audio_gameover" src="/assets/sounds/Die.wav" preload="auto"></audio>
+
+<script>
+(() => {
+  // ── Theme Toggle ──
+  const toggle = document.getElementById('themeToggle');
+  const htmlEl = document.documentElement;
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  htmlEl.setAttribute('data-theme', savedTheme);
+  toggle.textContent = savedTheme === 'dark' ? '☀︎' : '☽';
+  toggle.addEventListener('click', () => {
+    const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    htmlEl.setAttribute('data-theme', next);
+    toggle.textContent = next === 'dark' ? '☀︎' : '☽';
+    localStorage.setItem('theme', next);
+  });
+
+  // ── Constants (matching original) ──
+  const COLS = 10;
+  const ROWS = 22;
+  const BLOCK_SIZE = 20; // Original sprite size
+  const GAME_AREA_COLOR = 'rgb(213, 204, 187)';
+  const API_BASE = '/api';
+
+  // ── Piece definitions (from original NormalCowDef) ──
+  // Each: [cx, cy, ox0, oy0, ox1, oy1, ox2, oy2, ox3, oy3]
+  const COW_DEFS = [
+    [5, 0, -1, 0,  0, 0,  1, 0,  2, 0],   // Guernsey (I)
+    [5, 1, -1,-1, -1, 0,  0, 0,  1, 0],   // Aberdeen Angus (J)
+    [5, 1,  1,-1, -1, 0,  0, 0,  1, 0],   // Ayrshire (L)
+    [5, 1, -1,-1,  0,-1,  0, 0,  1, 0],   // Hereford (S)
+    [5, 1,  0,-1,  1,-1, -1, 0,  0, 0],   // Jersey (Z)
+    [5, 0, -1, 0,  0, 0,  1, 0,  0, 1],   // Texas Longhorn (T)
+    [5, 1,  0,-1,  1,-1,  0, 0,  1, 0],   // Holstein (O)
+  ];
+
+  const BREED_NAMES = [
+    'Guernsey', 'Aberdeen Angus', 'Ayrshire', 'Hereford',
+    'Jersey', 'Texas Longhorn', 'Holstein'
+  ];
+
+  // ── Scoring (matching original) ──
+  const LINE_SCORES = [0, 50, 150, 500, 1000];
+
+  // ── Sprite sheets ──
+  const cowMap = new Image();
+  cowMap.src = '/assets/images/source.png';
+  const nextCows = new Image();
+  nextCows.src = '/assets/images/next.png';
+
+  // ── Sound (matching original multi-channel approach) ──
+  const CHANNEL_MAX = 10;
+  const channels = [];
+  for (let i = 0; i < CHANNEL_MAX; i++) {
+    channels.push({ audio: new Audio(), finished: -1 });
+  }
+
+  function playSound(id) {
+    const src = document.getElementById('audio_' + id);
+    if (!src) return;
+    const now = Date.now();
+    for (let i = 0; i < channels.length; i++) {
+      if (channels[i].finished < now) {
+        channels[i].finished = now + (src.duration * 1000 || 1000);
+        channels[i].audio.src = src.src;
+        channels[i].audio.load();
+        channels[i].audio.play().catch(() => {});
+        break;
+      }
+    }
+  }
+
+  // ── Canvas Setup ──
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const previewCanvas = document.getElementById('preview');
+  const previewCtx = previewCanvas.getContext('2d');
+
+  function getCellSize() {
+    return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'));
+  }
+
+  // The game renders at the original BLOCK_SIZE internally,
+  // then we scale the canvas with CSS for responsive display
+  canvas.width = COLS * BLOCK_SIZE;
+  canvas.height = ROWS * BLOCK_SIZE;
+
+  function isMobileLayout() {
+    return window.innerWidth <= 520;
+  }
+
+  function resizeCanvas() {
+    if (isMobileLayout()) {
+      // Let CSS handle sizing on mobile (height-driven + aspect-ratio)
+      canvas.style.width = '';
+      canvas.style.height = '';
+    } else {
+      const cs = getCellSize();
+      canvas.style.width = (COLS * cs) + 'px';
+      canvas.style.height = (ROWS * cs) + 'px';
+    }
+  }
+  resizeCanvas();
+
+  // ── Cow / Piece Object ──
+  function createCow(breed) {
+    const def = COW_DEFS[breed];
+    return {
+      breed: breed,
+      rotation: 0,
+      cx: def[0],
+      cy: def[1],
+      offsets: [
+        { x: def[2], y: def[3] },
+        { x: def[4], y: def[5] },
+        { x: def[6], y: def[7] },
+        { x: def[8], y: def[9] },
+      ]
+    };
+  }
+
+  function cowPositions(cow) {
+    return cow.offsets.map(o => ({ x: o.x + cow.cx, y: o.y + cow.cy }));
+  }
+
+  function cloneCow(cow) {
+    return {
+      breed: cow.breed,
+      rotation: cow.rotation,
+      cx: cow.cx,
+      cy: cow.cy,
+      offsets: cow.offsets.map(o => ({ x: o.x, y: o.y }))
+    };
+  }
+
+  function rotateCow(cow) {
+    cow.rotation = (cow.rotation + 1) % 4;
+    for (let i = 0; i < 4; i++) {
+      const x = cow.offsets[i].x;
+      const y = cow.offsets[i].y;
+      cow.offsets[i].x = -y;
+      cow.offsets[i].y = x;
+    }
+  }
+
+  // ── Board State ──
+  let board = [];
+  let boardBreeds = []; // track which breed occupies each cell for drawing
+
+  function initBoard() {
+    board = [];
+    boardBreeds = [];
+    for (let r = 0; r < ROWS; r++) {
+      board.push(new Array(COLS).fill(0));
+      boardBreeds.push(new Array(COLS).fill(-1));
+    }
+  }
+
+  // Store what rotation+block index each settled cell had, for sprite drawing
+  let boardSprites = []; // [row][col] = { breed, blockIdx, rotation } or null
+  function initBoardSprites() {
+    boardSprites = [];
+    for (let r = 0; r < ROWS; r++) {
+      boardSprites.push(new Array(COLS).fill(null));
+    }
+  }
+
+  function isConflicted(cow) {
+    const positions = cowPositions(cow);
+    for (const p of positions) {
+      if (p.x < 0 || p.x >= COLS) return true;
+      if (p.y >= ROWS) return true;
+      if (p.y >= 0 && board[p.y][p.x] === 1) return true;
+    }
+    return false;
+  }
+
+  // ── Drawing with original sprite sheet ──
+  // source.png layout: each row is a breed (0-9), each column set is
+  // (block0_rot0, block1_rot0, block2_rot0, block3_rot0, block0_rot1, ...)
+  // So sprite x = (blockIndex + 4 * rotation) * BLOCK_SIZE
+  //    sprite y = breed * BLOCK_SIZE
+
+  function drawCowOnCanvas(context, cow) {
+    const positions = cowPositions(cow);
+    for (let i = 0; i < positions.length; i++) {
+      const p = positions[i];
+      const sx = (i + 4 * cow.rotation) * BLOCK_SIZE;
+      const sy = cow.breed * BLOCK_SIZE;
+      context.drawImage(cowMap, sx, sy, BLOCK_SIZE, BLOCK_SIZE,
+        p.x * BLOCK_SIZE, p.y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    }
+  }
+
+  function eraseCowOnCanvas(context, cow) {
+    const positions = cowPositions(cow);
+    context.fillStyle = GAME_AREA_COLOR;
+    for (const p of positions) {
+      context.fillRect(p.x * BLOCK_SIZE, p.y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    }
+  }
+
+  // For settled blocks, we need to redraw from stored sprite info
+  function addToBoard(cow) {
+    const positions = cowPositions(cow);
+    for (let i = 0; i < positions.length; i++) {
+      const p = positions[i];
+      if (p.y >= 0 && p.y < ROWS) {
+        board[p.y][p.x] = 1;
+        boardSprites[p.y][p.x] = {
+          breed: cow.breed,
+          blockIdx: i,
+          rotation: cow.rotation
+        };
+      }
+    }
+  }
+
+  // Redraw settled board from scratch (needed after row clears)
+  function redrawBoard() {
+    ctx.fillStyle = GAME_AREA_COLOR;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const sp = boardSprites[r][c];
+        if (sp) {
+          const sx = (sp.blockIdx + 4 * sp.rotation) * BLOCK_SIZE;
+          const sy = sp.breed * BLOCK_SIZE;
+          ctx.drawImage(cowMap, sx, sy, BLOCK_SIZE, BLOCK_SIZE,
+            c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        }
+      }
+    }
+  }
+
+  // Mobile preview canvas
+  const previewMCanvas = document.getElementById('previewM');
+  const previewMCtx = previewMCanvas.getContext('2d');
+
+  function drawPreview(cow) {
+    const name = BREED_NAMES[cow.breed];
+    // Desktop preview
+    previewCtx.fillStyle = 'rgb(221, 204, 187)';
+    previewCtx.fillRect(0, 0, 80, 40);
+    previewCtx.drawImage(nextCows, 0, cow.breed * 40, 80, 40, 0, 0, 80, 40);
+    document.getElementById('breedName').textContent = name;
+    // Mobile preview
+    previewMCtx.fillStyle = 'rgb(221, 204, 187)';
+    previewMCtx.fillRect(0, 0, 80, 40);
+    previewMCtx.drawImage(nextCows, 0, cow.breed * 40, 80, 40, 0, 0, 80, 40);
+    document.getElementById('breedNameM').textContent = name;
+  }
+
+  // ── Game State ──
+  let piece = null;
+  let nextPiece = null;
+  let score = 0;
+  let level = 0;
+  let rowsCleared = 0;
+  let playing = false;
+  let paused = false;
+  let gameOverFlag = false;
+  let gameInterval = null;
+  let dropIntervalID = null;
+  let lastHighlightRank = -1;
+
+  function getTimerInterval() {
+    return 1000 * (0.5 - (0.0472 * level));
+  }
+
+  function startTimer() {
+    stopTimer();
+    gameInterval = setInterval(advancePiece, getTimerInterval());
+  }
+
+  function stopTimer() {
+    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+  }
+
+  function clearDrop() {
+    if (dropIntervalID) { clearInterval(dropIntervalID); dropIntervalID = null; }
+  }
+
+  // ── Row clearing (matching original logic) ──
+  function checkRowCompletions(numZapped) {
+    numZapped = numZapped || 0;
+    let recurse = false;
+
+    for (let r = 0; r < board.length; r++) {
+      let sum = 0;
+      for (let c = 0; c < COLS; c++) sum += board[r][c];
+      if (sum === COLS) {
+        zapRow(r);
+        recurse = true;
+        break;
+      }
+    }
+
+    if (recurse) {
+      checkRowCompletions(numZapped + 1);
+    } else {
+      rowCompletionsFinished(numZapped);
+    }
+  }
+
+  function zapRow(rowNum) {
+    board.splice(rowNum, 1);
+    board.unshift(new Array(COLS).fill(0));
+    boardSprites.splice(rowNum, 1);
+    boardSprites.unshift(new Array(COLS).fill(null));
+    redrawBoard();
+  }
+
+  function rowCompletionsFinished(numZapped) {
+    if (numZapped > 0) {
+      // Update level
+      if (Math.floor((rowsCleared + numZapped) / 10) === level + 1) {
+        level++;
+        startTimer();
+      }
+      // Update score
+      score += LINE_SCORES[numZapped] * (level + 1);
+      rowsCleared += numZapped;
+
+      if (numZapped > 1) {
+        playSound('multirow');
+      } else {
+        playSound('row');
+      }
+      updateDisplay();
+    }
+  }
+
+  // ── Core Game Actions (matching original) ──
+  function advancePiece() {
+    if (!gameInterval && !dropIntervalID) return;
+
+    const provisional = cloneCow(piece);
+    provisional.cy++;
+
+    if (isConflicted(provisional)) {
+      addToBoard(piece);
+      clearDrop();
+      checkRowCompletions();
+      newPiece();
+    } else {
+      eraseCowOnCanvas(ctx, piece);
+      piece.cy++;
+      drawCowOnCanvas(ctx, piece);
+    }
+  }
+
+  function movePieceLeft() {
+    if (!gameInterval || paused) return;
+    const provisional = cloneCow(piece);
+    provisional.cx--;
+    if (!isConflicted(provisional)) {
+      eraseCowOnCanvas(ctx, piece);
+      piece.cx--;
+      drawCowOnCanvas(ctx, piece);
+    }
+  }
+
+  function movePieceRight() {
+    if (!gameInterval || paused) return;
+    const provisional = cloneCow(piece);
+    provisional.cx++;
+    if (!isConflicted(provisional)) {
+      eraseCowOnCanvas(ctx, piece);
+      piece.cx++;
+      drawCowOnCanvas(ctx, piece);
+    }
+  }
+
+  function rotatePiece() {
+    if (!gameInterval || paused) return;
+    const provisional = cloneCow(piece);
+    rotateCow(provisional);
+    if (!isConflicted(provisional)) {
+      eraseCowOnCanvas(ctx, piece);
+      rotateCow(piece);
+      drawCowOnCanvas(ctx, piece);
+    }
+    // No wall kicks — matching original behavior
+  }
+
+  function dropPiece() {
+    if (!gameInterval || paused) return;
+    // Original: sets a fast interval, not instant drop
+    dropIntervalID = setInterval(advancePiece, 10);
+  }
+
+  function softDrop() {
+    if (!gameInterval || paused) return;
+    advancePiece();
+  }
+
+  function newPiece() {
+    piece = cloneCow(nextPiece);
+    // Reset center to definition start position
+    const def = COW_DEFS[piece.breed];
+    piece.cx = def[0];
+    piece.cy = def[1];
+    // Re-clone offsets from definition (reset rotation)
+    piece.offsets = [
+      { x: def[2], y: def[3] },
+      { x: def[4], y: def[5] },
+      { x: def[6], y: def[7] },
+      { x: def[8], y: def[9] },
+    ];
+    piece.rotation = 0;
+
+    nextPiece = createCow(Math.floor(Math.random() * 7));
+    drawPreview(nextPiece);
+
+    if (isConflicted(piece)) {
+      doGameOver();
+    } else {
+      drawCowOnCanvas(ctx, piece);
+    }
+  }
+
+  function doGameOver() {
+    stopTimer();
+    clearDrop();
+    playing = false;
+    gameOverFlag = true;
+    playSound('gameover');
+    showGameOver();
+  }
+
+  function togglePause() {
+    if (!playing || gameOverFlag) return;
+    paused = !paused;
+    if (paused) {
+      stopTimer();
+      document.getElementById('overlayPaused').classList.add('active');
+    } else {
+      startTimer();
+      document.getElementById('overlayPaused').classList.remove('active');
+    }
+  }
+
+  // ── New Game ──
+  function newGame() {
+    initBoard();
+    initBoardSprites();
+
+    ctx.fillStyle = GAME_AREA_COLOR;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    score = 0;
+    level = 0;
+    rowsCleared = 0;
+    playing = true;
+    paused = false;
+    gameOverFlag = false;
+    lastHighlightRank = -1;
+
+    piece = createCow(Math.floor(Math.random() * 7));
+    nextPiece = createCow(Math.floor(Math.random() * 7));
+
+    drawCowOnCanvas(ctx, piece);
+    drawPreview(nextPiece);
+
+    updateDisplay();
+    startTimer();
+    hideOverlays();
+
+    playSound('madcow');
+  }
+
+  function updateDisplay() {
+    document.getElementById('dispScore').textContent = score;
+    document.getElementById('dispLevel').textContent = level;
+    document.getElementById('dispRows').textContent = rowsCleared;
+    // Mobile mirrors
+    document.getElementById('dispScoreM').textContent = score;
+    document.getElementById('dispLevelM').textContent = level;
+    document.getElementById('dispRowsM').textContent = rowsCleared;
+  }
+
+  function hideOverlays() {
+    document.getElementById('overlayGameOver').classList.remove('active');
+    document.getElementById('overlayPaused').classList.remove('active');
+  }
+
+  function showGameOver() {
+    document.getElementById('finalScoreText').textContent =
+      'Score: ' + score + ' \u00B7 ' + rowsCleared + ' rows \u00B7 Level ' + level;
+    document.getElementById('nameInput').value = localStorage.getItem('cowtris_name') || '';
+    document.getElementById('overlayGameOver').classList.add('active');
+    setTimeout(() => document.getElementById('nameInput').focus(), 100);
+  }
+
+  // ── Keyboard Controls (matching original keycodes) ──
+  document.addEventListener('keydown', (e) => {
+    // Let text input receive all keys normally
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+      if (e.key === 'Enter') { submitScore(); }
+      return;
+    }
+
+    if (gameOverFlag && document.getElementById('overlayGameOver').classList.contains('active')) {
+      if (e.key === 'Enter') { submitScore(); return; }
+    }
+
+    switch (e.keyCode || e.which) {
+      case 32: // Space — drop (fast advance, not instant)
+        e.preventDefault();
+        if (playing && !paused && !gameOverFlag) dropPiece();
+        break;
+      case 37: // Left
+        e.preventDefault();
+        if (playing && !gameOverFlag) movePieceLeft();
+        break;
+      case 38: // Up — rotate
+        e.preventDefault();
+        if (playing && !gameOverFlag) rotatePiece();
+        break;
+      case 39: // Right
+        e.preventDefault();
+        if (playing && !gameOverFlag) movePieceRight();
+        break;
+      case 40: // Down — advance
+        e.preventDefault();
+        if (playing && !gameOverFlag) softDrop();
+        break;
+      case 78: // N — new game
+        e.preventDefault();
+        if (playing) newGame();
+        break;
+      case 80: // P — pause
+        e.preventDefault();
+        togglePause();
+        break;
+    }
+  });
+
+  // ── Touch Controls ──
+  document.querySelectorAll('.touch-btn').forEach(btn => {
+    const action = btn.dataset.action;
+
+    function doAction() {
+      if (!playing || gameOverFlag) return;
+      if (paused) return;
+      switch (action) {
+        case 'left':   movePieceLeft(); break;
+        case 'right':  movePieceRight(); break;
+        case 'down':   softDrop(); break;
+        case 'rotate': rotatePiece(); break;
+        case 'drop':   dropPiece(); break;
+      }
+    }
+
+    let repeatTimer = null;
+    let repeatInterval = null;
+
+    btn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      doAction();
+      if (action === 'left' || action === 'right' || action === 'down') {
+        repeatTimer = setTimeout(() => {
+          repeatInterval = setInterval(doAction, 80);
+        }, 200);
+      }
+    });
+
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      clearTimeout(repeatTimer);
+      clearInterval(repeatInterval);
+    });
+
+    btn.addEventListener('touchcancel', () => {
+      clearTimeout(repeatTimer);
+      clearInterval(repeatInterval);
+    });
+
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      doAction();
+    });
+  });
+
+  document.getElementById('overlayPaused').addEventListener('click', togglePause);
+  document.getElementById('overlayPaused').addEventListener('touchend', (e) => {
+    e.preventDefault();
+    togglePause();
+  });
+
+  // ── Buttons ──
+  document.getElementById('btnNew').addEventListener('click', newGame);
+  document.getElementById('btnPause').addEventListener('click', togglePause);
+
+  // ── Score Submission ──
+  document.getElementById('submitScoreBtn').addEventListener('click', submitScore);
+
+  async function submitScore() {
+    const name = document.getElementById('nameInput').value.trim() || 'Anonymous';
+    localStorage.setItem('cowtris_name', name);
+
+    if (score === 0) {
+      hideOverlays();
+      return;
+    }
+
+    try {
+      const res = await fetch(API_BASE + '/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, score: score, rows_cleared: rowsCleared })
+      });
+      if (res.ok) {
+        const scores = await res.json();
+        const rank = scores.findIndex(s => s.score === score && s.name === name);
+        lastHighlightRank = rank;
+        renderScoreboard(scores);
+      }
+    } catch (e) {
+      console.error('Failed to submit score:', e);
+    }
+
+    hideOverlays();
+  }
+
+  // ── Scoreboard ──
+  async function loadScoreboard() {
+    try {
+      const res = await fetch(API_BASE + '/scores');
+      if (res.ok) {
+        const scores = await res.json();
+        renderScoreboard(scores);
+      }
+    } catch (e) {
+      document.getElementById('scoreContent').innerHTML =
+        '<p class="score-empty">Scoreboard unavailable</p>';
+    }
+  }
+
+  function renderScoreboard(scores) {
+    const container = document.getElementById('scoreContent');
+    if (!scores || scores.length === 0) {
+      container.innerHTML = '<p class="score-empty">No scores yet. Be the first!</p>';
+      return;
+    }
+
+    let html = '<table class="score-table"><thead><tr>' +
+      '<th class="rank">#</th><th>Name</th>' +
+      '<th class="score-col">Score</th><th class="rows-col">Rows</th>' +
+      '</tr></thead><tbody>';
+
+    scores.forEach((s, i) => {
+      const hl = i === lastHighlightRank ? ' class="highlight"' : '';
+      html += '<tr' + hl + '>' +
+        '<td class="rank">' + (i + 1) + '</td>' +
+        '<td>' + escHtml(s.name) + '</td>' +
+        '<td class="score-col">' + Number(s.score).toLocaleString() + '</td>' +
+        '<td class="rows-col">' + s.rows_cleared + '</td>' +
+        '</tr>';
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // ── Resize handling ──
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(resizeCanvas, 100);
+  });
+
+  // ── Init ──
+  initBoard();
+  initBoardSprites();
+  loadScoreboard();
+
+  // Wait for sprite sheets to load before starting
+  let loaded = 0;
+  function onAssetLoad() {
+    loaded++;
+    if (loaded >= 2) newGame();
+  }
+  cowMap.onload = onAssetLoad;
+  nextCows.onload = onAssetLoad;
+  // Fallback if already cached
+  if (cowMap.complete) { loaded++; }
+  if (nextCows.complete) { loaded++; }
+  if (loaded >= 2) newGame();
+})();
+</script>
+
+</body>
+</html>
