@@ -125,7 +125,10 @@
       display: flex;
       flex-direction: column;
       gap: 0;
-      min-width: 160px;
+      width: 180px;
+      min-width: 180px;
+      max-width: 180px;
+      flex-shrink: 0;
     }
 
     /* ── Info panel with cowback background ── */
@@ -146,6 +149,7 @@
     .info-table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
     }
 
     .info-table td {
@@ -161,6 +165,7 @@
       color: var(--text);
       white-space: nowrap;
       padding-right: 0.5rem;
+      width: 3rem;
     }
 
     .info-table td:last-child {
@@ -175,6 +180,8 @@
       display: block;
       image-rendering: pixelated;
       margin: 0 auto;
+      width: 80px;
+      height: 40px;
     }
 
     .breed-name {
@@ -184,6 +191,9 @@
       text-align: center;
       margin-top: 0.15rem;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
 
     /* ── Mobile info strip (hidden on desktop, shown on mobile) ── */
@@ -242,6 +252,48 @@
       display: flex;
       gap: 0.5rem;
       justify-content: center;
+    }
+
+    /* ── Music Player ── */
+    .music-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.6rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .music-bar button {
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .music-bar button:hover { color: var(--accent); }
+
+    .music-bar .track-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.65rem;
+    }
+
+    .music-bar input[type="range"] {
+      width: 60px;
+      height: 4px;
+      accent-color: var(--accent);
+      cursor: pointer;
     }
 
     /* ── Buttons ── */
@@ -414,10 +466,11 @@
         aspect-ratio: 10 / 22;
       }
 
-      /* Compact side column for mobile */
+      /* Compact side column for mobile — fixed width so layout doesn't shift */
       .side-col {
-        min-width: 0;
-        flex: 1;
+        width: 120px;
+        min-width: 120px;
+        flex: none;
         gap: 0;
       }
 
@@ -584,6 +637,13 @@
           <div class="breed-name" id="breedNameM">&nbsp;</div>
         </div>
       </div>
+    </div>
+
+    <div class="music-bar" id="musicBar">
+      <button id="musicToggle" title="Play/Pause music">&#9654;</button>
+      <span class="track-name" id="trackName">Music off</span>
+      <button id="musicSkip" title="Next track">&#x23ED;</button>
+      <input type="range" id="musicVol" min="0" max="100" value="30" title="Volume">
     </div>
 
     <div class="controls-hint">
@@ -1320,6 +1380,97 @@
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(resizeCanvas, 100);
   });
+
+  // ── Music Player ──
+  const TRACK_COUNT = 18;
+  const musicAudio = new Audio();
+  musicAudio.loop = false;
+  let musicPlaying = false;
+  let currentTrack = 0;
+
+  // Shuffle order so it's not always the same sequence
+  const trackOrder = Array.from({length: TRACK_COUNT}, (_, i) => i + 1);
+  for (let i = trackOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [trackOrder[i], trackOrder[j]] = [trackOrder[j], trackOrder[i]];
+  }
+
+  musicAudio.volume = 0.3;
+  const volSlider = document.getElementById('musicVol');
+  const trackNameEl = document.getElementById('trackName');
+  const musicToggleBtn = document.getElementById('musicToggle');
+
+  volSlider.addEventListener('input', () => {
+    musicAudio.volume = volSlider.value / 100;
+    localStorage.setItem('cowtris_vol', volSlider.value);
+  });
+
+  // Restore saved volume
+  const savedVol = localStorage.getItem('cowtris_vol');
+  if (savedVol !== null) {
+    volSlider.value = savedVol;
+    musicAudio.volume = savedVol / 100;
+  }
+
+  function loadTrack(index) {
+    const trackNum = trackOrder[index % trackOrder.length];
+    musicAudio.src = '/assets/music/midi' + trackNum + '.mp3';
+    trackNameEl.textContent = 'Track ' + trackNum;
+  }
+
+  function playMusic() {
+    if (!musicPlaying) {
+      loadTrack(currentTrack);
+    }
+    musicAudio.play().then(() => {
+      musicPlaying = true;
+      musicToggleBtn.textContent = '\u23F8'; // pause symbol
+      localStorage.setItem('cowtris_music', '1');
+    }).catch(() => {});
+  }
+
+  function pauseMusic() {
+    musicAudio.pause();
+    musicPlaying = false;
+    musicToggleBtn.textContent = '\u25B6'; // play symbol
+    localStorage.setItem('cowtris_music', '0');
+  }
+
+  function nextTrack() {
+    currentTrack = (currentTrack + 1) % trackOrder.length;
+    loadTrack(currentTrack);
+    if (musicPlaying) {
+      musicAudio.play().catch(() => {});
+    }
+  }
+
+  musicAudio.addEventListener('ended', nextTrack);
+
+  document.getElementById('musicToggle').addEventListener('click', () => {
+    if (musicPlaying) pauseMusic();
+    else playMusic();
+  });
+
+  document.getElementById('musicSkip').addEventListener('click', nextTrack);
+
+  // Play madcow + start music on first user interaction (browser autoplay policy)
+  {
+    const onFirstGesture = () => {
+      playSound('madcow');
+      if (localStorage.getItem('cowtris_music') !== '0') {
+        playMusic();
+      }
+      document.removeEventListener('click', onFirstGesture);
+      document.removeEventListener('touchstart', onFirstGesture);
+      document.removeEventListener('keydown', onFirstGesture);
+    };
+    document.addEventListener('click', onFirstGesture);
+    document.addEventListener('touchstart', onFirstGesture);
+    document.addEventListener('keydown', onFirstGesture);
+    if (localStorage.getItem('cowtris_music') !== '0') {
+      trackNameEl.textContent = 'Music starts on first tap';
+    }
+  }
 
   // ── Init ──
   initBoard();

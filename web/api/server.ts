@@ -21,6 +21,7 @@ const GAME_HTML_PATH = resolve(COWTRIS_DIR, "index.html");
 const MIME_TYPES: Record<string, string> = {
   ".png": "image/png",
   ".wav": "audio/wav",
+  ".mp3": "audio/mpeg",
   ".jpg": "image/jpeg",
   ".gif": "image/gif",
   ".css": "text/css",
