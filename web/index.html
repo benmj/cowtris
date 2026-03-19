@@ -1554,6 +1554,13 @@
       e.preventDefault();
       toggleHelp();
     }
+    // Escape: dismiss help overlay if open
+    if (e.key === 'Escape') {
+      if (document.getElementById('helpOverlay').classList.contains('active')) {
+        e.preventDefault();
+        toggleHelp();
+      }
+    }
   });
 
   // ── Touch Controls ──
