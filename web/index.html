@@ -1263,7 +1263,7 @@
   let lastHighlightRank = -1;
 
   function getTimerInterval() {
-    return 1000 * (0.5 - (0.0472 * level));
+    return 1000 * (0.5 - (0.0472 * Math.min(level, 10)));
   }
 
   function startTimer() {
@@ -1382,10 +1382,21 @@
     // No wall kicks — matching original behavior
   }
 
-  function dropPiece() {
+  function hardDrop() {
     if (!gameInterval || paused) return;
-    // Original: sets a fast interval, not instant drop
-    dropIntervalID = setInterval(advancePiece, 10);
+    // Instant hard drop — move piece all the way to the bottom then lock
+    while (true) {
+      const provisional = cloneCow(piece);
+      provisional.cy++;
+      if (isConflicted(provisional)) break;
+      eraseCowOnCanvas(ctx, piece);
+      piece.cy++;
+      drawCowOnCanvas(ctx, piece);
+    }
+    addToBoard(piece);
+    clearDrop();
+    checkRowCompletions();
+    newPiece();
   }
 
   function softDrop() {
@@ -1506,7 +1517,7 @@
     switch (e.keyCode || e.which) {
       case 32: // Space — drop (fast advance, not instant)
         e.preventDefault();
-        if (playing && !paused && !gameOverFlag) dropPiece();
+        if (playing && !paused && !gameOverFlag) hardDrop();
         break;
       case 37: // Left
         e.preventDefault();
@@ -1557,7 +1568,7 @@
         case 'right':  movePieceRight(); break;
         case 'down':   softDrop(); break;
         case 'rotate': rotatePiece(); break;
-        case 'drop':   dropPiece(); break;
+        case 'drop':   hardDrop(); break;
       }
     }
 
