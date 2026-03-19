@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog &middot; Cowtris</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #f7f5f0;
+      --bg2:      #eeeae2;
+      --text:     #1a1916;
+      --muted:    #6b6760;
+      --border:   #d8d4cc;
+      --accent:   #c04a1a;
+      --link:     #1a5276;
+      --surface:  #ffffff;
+    }
+
+    [data-theme="dark"] {
+      --bg:       #141210;
+      --bg2:      #1e1b18;
+      --text:     #e8e4dc;
+      --muted:    #8a8680;
+      --border:   #302c28;
+      --accent:   #e06030;
+      --link:     #7bafd4;
+      --surface:  #1e1b18;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 17px; }
+
+    body {
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.25s, color 0.25s;
+      min-height: 100vh;
+    }
+
+    .toggle {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: border-color 0.2s, background 0.25s, color 0.2s;
+      z-index: 100;
+    }
+    .toggle:hover { border-color: var(--muted); color: var(--text); }
+
+    .page {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    .back {
+      display: inline-block;
+      font-size: 0.825rem;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 1.75rem;
+    }
+    .back:hover { color: var(--accent); }
+
+    h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      font-style: italic;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 2.5rem;
+    }
+
+    .changelog-group {
+      margin-bottom: 2rem;
+    }
+
+    .changelog-date {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .changelog-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .changelog-list li {
+      font-size: 0.85rem;
+      color: var(--text);
+      padding: 0.3rem 0;
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .changelog-list li:last-child { border-bottom: none; }
+
+    .changelog-list li::before {
+      content: '–';
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .commit-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.65rem;
+      font-variant-numeric: tabular-nums;
+      font-family: monospace;
+      flex-shrink: 0;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.1em 0.35em;
+    }
+    .commit-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    footer a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+</head>
+<body>
+
+  <button class="toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">☀︎</button>
+
+  <div class="page">
+    <a class="back" href="/">&larr; Back to Cowtris</a>
+
+    <h1>Changelog</h1>
+    <p class="subtitle">A record of changes to Cowtris &middot; <a href="https://github.com/benmj/cowtris" style="color:var(--muted)">github.com/benmj/cowtris</a></p>
+
+    <div class="changelog-group">
+      <div class="changelog-date">Mar 19, 2026</div>
+      <ul class="changelog-list">
+        <li><a class="commit-link" href="https://github.com/benmj/cowtris/commit/07a07b0" target="_blank" rel="noopener">07a07b0</a> Escape key dismisses the help overlay</li>
+        <li><a class="commit-link" href="https://github.com/benmj/cowtris/commit/fb7ba28" target="_blank" rel="noopener">fb7ba28</a> Speed capped at level 10; Space bar hard-drops instantly</li>
+      </ul>
+    </div>
+
+    <div class="changelog-group">
+      <div class="changelog-date">Mar 13, 2026</div>
+      <ul class="changelog-list">
+        <li><a class="commit-link" href="https://github.com/benmj/cowtris/commit/ddf0e31" target="_blank" rel="noopener">ddf0e31</a> Attract screen with animated high scores; help overlay with keyboard shortcuts</li>
+        <li><a class="commit-link" href="https://github.com/benmj/cowtris/commit/eafaf86" target="_blank" rel="noopener">eafaf86</a> Music player with skip &amp; volume controls; high scores table in-game</li>
+        <li><a class="commit-link" href="https://github.com/benmj/cowtris/commit/e38116a" target="_blank" rel="noopener">e38116a</a> Remastered MIDI soundtrack using FluidR3_GM soundfont</li>
+        <li><a class="commit-link" href="https://github.com/benmj/cowtris/commit/cd95972" target="_blank" rel="noopener">cd95972</a> Responsive layout for short viewports and small laptops</li>
+        <li><a class="commit-link" href="https://github.com/benmj/cowtris/commit/964c1ef" target="_blank" rel="noopener">964c1ef</a> 2026 rewrite: mobile-friendly HTML5 canvas port with cow sprites</li>
+      </ul>
+    </div>
+
+    <footer>
+      <a href="https://github.com/benmj/cowtris">View source on GitHub</a>
+    </footer>
+  </div>
+
+<script>
+  const toggle = document.getElementById('themeToggle');
+  const htmlEl = document.documentElement;
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  htmlEl.setAttribute('data-theme', savedTheme);
+  toggle.textContent = savedTheme === 'dark' ? '☀︎' : '☽';
+  toggle.addEventListener('click', () => {
+    const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    htmlEl.setAttribute('data-theme', next);
+    toggle.textContent = next === 'dark' ? '☀︎' : '☽';
+    localStorage.setItem('theme', next);
+  });
+</script>
+
+</body>
+</html>

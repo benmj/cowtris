@@ -17,6 +17,7 @@ db.run(`CREATE INDEX IF NOT EXISTS idx_scores_score ON scores(score DESC)`);
 
 const COWTRIS_DIR = resolve(import.meta.dir, "..");
 const GAME_HTML_PATH = resolve(COWTRIS_DIR, "index.html");
+const CHANGELOG_HTML_PATH = resolve(COWTRIS_DIR, "changelog.html");
 
 const MIME_TYPES: Record<string, string> = {
   ".png": "image/png",
@@ -117,6 +118,14 @@ Bun.serve({
     // ── Serve game HTML ──
     if (path === "/" || path === "") {
       const file = Bun.file(GAME_HTML_PATH);
+      return new Response(file, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // ── Serve changelog ──
+    if (path === "/changelog") {
+      const file = Bun.file(CHANGELOG_HTML_PATH);
       return new Response(file, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
