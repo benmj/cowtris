@@ -837,6 +837,72 @@
       text-align: center;
     }
     footer a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ── Changelog ── */
+    .changelog {
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    .changelog h2 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 0.9rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .changelog-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .changelog-date {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+    }
+
+    .changelog-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .changelog-list li {
+      font-size: 0.8rem;
+      color: var(--text);
+      padding: 0.2rem 0;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .changelog-list li::before {
+      content: '–';
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .changelog-list a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.65rem;
+      font-variant-numeric: tabular-nums;
+      font-family: monospace;
+      flex-shrink: 0;
+    }
+
+    .changelog-list a:hover { color: var(--accent); }
+
+    @media (max-width: 520px) {
+      .changelog { margin-top: 1rem; padding-top: 0.75rem; }
+    }
+
   </style>
 </head>
 <body>
@@ -985,6 +1051,30 @@
         <a href="https://github.com/benmj/cowtris">View source on GitHub.</a>
       </p>
     </footer>
+
+    <section class="changelog">
+      <h2>Changelog</h2>
+
+      <div class="changelog-group">
+        <div class="changelog-date">Mar 19, 2026</div>
+        <ul class="changelog-list">
+          <li><a href="https://github.com/benmj/cowtris/commit/07a07b0" target="_blank" rel="noopener">07a07b0</a> Escape key dismisses the help overlay</li>
+          <li><a href="https://github.com/benmj/cowtris/commit/fb7ba28" target="_blank" rel="noopener">fb7ba28</a> Speed capped at level 10; Space bar hard-drops instantly</li>
+        </ul>
+      </div>
+
+      <div class="changelog-group">
+        <div class="changelog-date">Mar 13, 2026</div>
+        <ul class="changelog-list">
+          <li><a href="https://github.com/benmj/cowtris/commit/ddf0e31" target="_blank" rel="noopener">ddf0e31</a> Attract screen with animated high scores; help overlay with keyboard shortcuts</li>
+          <li><a href="https://github.com/benmj/cowtris/commit/eafaf86" target="_blank" rel="noopener">eafaf86</a> Music player with skip &amp; volume controls; high scores table in-game</li>
+          <li><a href="https://github.com/benmj/cowtris/commit/e38116a" target="_blank" rel="noopener">e38116a</a> Remastered MIDI soundtrack using FluidR3_GM soundfont</li>
+          <li><a href="https://github.com/benmj/cowtris/commit/cd95972" target="_blank" rel="noopener">cd95972</a> Responsive layout for short viewports and small laptops</li>
+          <li><a href="https://github.com/benmj/cowtris/commit/964c1ef" target="_blank" rel="noopener">964c1ef</a> 2026 rewrite: mobile-friendly HTML5 canvas port with cow sprites</li>
+        </ul>
+      </div>
+    </section>
+
 
   </div>
 
