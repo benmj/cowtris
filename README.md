@@ -50,6 +50,8 @@ The entire 2026 port was built in a single Claude Code session. Ben described wh
 
 The original 2013 HTML5 port and all historical assets (VB-era sprites, MIDI files, sounds) are preserved in the `archive/` directory. See [archive/readme-2.1.md](archive/readme-2.1.md) for the original Nonsense Software description.
 
+A provenance-focused [Cowtris 2.1 reference reconstruction](historical/cowtris-2.1-reconstruction/README.md) documents the special-cow mechanics recovered from the shipped VB6 executable. It includes readable VB-style pseudocode, p-code evidence, a sound-resource manifest, and a reproducible inspection tool; it is intentionally not presented as original or compilable source.
+
 ## License
 
 GNU General Public License (see [archive/readme-2.1.md](archive/readme-2.1.md)).

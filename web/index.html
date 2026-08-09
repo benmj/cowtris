@@ -871,6 +871,12 @@
         <tr><td><kbd>M</kbd></td><td>Music on/off</td></tr>
         <tr><td><kbd>?</kbd></td><td>This help</td></tr>
       </table>
+      <h3>Special Cows</h3>
+      <table>
+        <tr><td><img src="/assets/images/mad-cow.gif" width="20" height="20" alt="Mad Cow"></td><td>Mad Cow blasts the surrounding cells</td></tr>
+        <tr><td><img src="/assets/images/holy-cow.gif" width="20" height="20" alt="Holy Cow"></td><td>Holy Cow tunnels a hole through blocks</td></tr>
+        <tr><td><img src="/assets/images/purple-cow.gif" width="20" height="20" alt="Purple Cow"></td><td>Purple Cow clears its landing row</td></tr>
+      </table>
       <button class="close-help" id="closeHelp">Got it</button>
     </div>
   </div>
@@ -999,6 +1005,9 @@
   <audio id="audio_row" src="/assets/sounds/Zap.wav" preload="auto"></audio>
   <audio id="audio_multirow" src="/assets/sounds/Zap2.wav" preload="auto"></audio>
   <audio id="audio_gameover" src="/assets/sounds/Die.wav" preload="auto"></audio>
+  <audio id="audio_explode" src="/assets/sounds/explode.wav" preload="auto"></audio>
+  <audio id="audio_holycow" src="/assets/sounds/holy-cow.wav" preload="auto"></audio>
+  <audio id="audio_purplecow" src="/assets/sounds/purple-cow.wav" preload="auto"></audio>
 
 <script>
 (() => {
@@ -1022,22 +1031,33 @@
   const GAME_AREA_COLOR = 'rgb(213, 204, 187)';
   const API_BASE = '/api';
 
-  // ── Piece definitions (from original NormalCowDef) ──
-  // Each: [cx, cy, ox0, oy0, ox1, oy1, ox2, oy2, ox3, oy3]
+  // ── Piece definitions (from the original Visual Basic game) ──
+  // Each normal cow has four offsets; special cows are one-cell pieces.
   const COW_DEFS = [
-    [5, 0, -1, 0,  0, 0,  1, 0,  2, 0],   // Guernsey (I)
-    [5, 1, -1,-1, -1, 0,  0, 0,  1, 0],   // Aberdeen Angus (J)
-    [5, 1,  1,-1, -1, 0,  0, 0,  1, 0],   // Ayrshire (L)
-    [5, 1, -1,-1,  0,-1,  0, 0,  1, 0],   // Hereford (S)
-    [5, 1,  0,-1,  1,-1, -1, 0,  0, 0],   // Jersey (Z)
-    [5, 0, -1, 0,  0, 0,  1, 0,  0, 1],   // Texas Longhorn (T)
-    [5, 1,  0,-1,  1,-1,  0, 0,  1, 0],   // Holstein (O)
+    { center: [5, 0], offsets: [[-1, 0], [ 0, 0], [ 1, 0], [ 2, 0]] }, // Guernsey (I)
+    { center: [5, 1], offsets: [[-1,-1], [-1, 0], [ 0, 0], [ 1, 0]] }, // Aberdeen Angus (J)
+    { center: [5, 1], offsets: [[ 1,-1], [-1, 0], [ 0, 0], [ 1, 0]] }, // Ayrshire (L)
+    { center: [5, 1], offsets: [[-1,-1], [ 0,-1], [ 0, 0], [ 1, 0]] }, // Hereford (S)
+    { center: [5, 1], offsets: [[ 0,-1], [ 1,-1], [-1, 0], [ 0, 0]] }, // Jersey (Z)
+    { center: [5, 0], offsets: [[-1, 0], [ 0, 0], [ 1, 0], [ 0, 1]] }, // Texas Longhorn (T)
+    { center: [5, 1], offsets: [[ 0,-1], [ 1,-1], [ 0, 0], [ 1, 0]] }, // Holstein (O)
+    { center: [5, 1], offsets: [[ 0, 0]] }, // Mad Cow
+    { center: [5, 1], offsets: [[ 0, 0]] }, // Holy Cow
+    { center: [5, 1], offsets: [[ 0, 0]] }, // Purple Cow
   ];
 
   const BREED_NAMES = [
     'Guernsey', 'Aberdeen Angus', 'Ayrshire', 'Hereford',
-    'Jersey', 'Texas Longhorn', 'Holstein'
+    'Jersey', 'Texas Longhorn', 'Holstein', 'Mad Cow', 'Holy Cow',
+    'Purple Cow'
   ];
+
+  const FIRST_SPECIAL_BREED = 7;
+  const SPECIAL_BREEDS = {
+    MAD: 7,
+    HOLY: 8,
+    PURPLE: 9,
+  };
 
   // ── Scoring (matching original) ──
   const LINE_SCORES = [0, 50, 150, 500, 1000];
@@ -1047,6 +1067,15 @@
   cowMap.src = '/assets/images/source.png';
   const nextCows = new Image();
   nextCows.src = '/assets/images/next.png';
+  const specialCowImages = [
+    '/assets/images/mad-cow.gif',
+    '/assets/images/holy-cow.gif',
+    '/assets/images/purple-cow.gif',
+  ].map(src => {
+    const image = new Image();
+    image.src = src;
+    return image;
+  });
 
   // ── Sound (matching original multi-channel approach) ──
   const CHANNEL_MAX = 10;
@@ -1112,15 +1141,20 @@
     return {
       breed: breed,
       rotation: 0,
-      cx: def[0],
-      cy: def[1],
-      offsets: [
-        { x: def[2], y: def[3] },
-        { x: def[4], y: def[5] },
-        { x: def[6], y: def[7] },
-        { x: def[8], y: def[9] },
-      ]
+      cx: def.center[0],
+      cy: def.center[1],
+      offsets: def.offsets.map(([x, y]) => ({ x, y }))
     };
+  }
+
+  function randomCowBreed() {
+    // The 2.1 build used CInt(Rnd * 100 + 1) <= 5, then
+    // CInt(Rnd * 2) + 8. CInt rounds rather than truncating, making
+    // specials 4.5% overall and Holy twice as common as Mad or Purple.
+    if (Math.round(Math.random() * 100 + 1) <= 5) {
+      return FIRST_SPECIAL_BREED + Math.round(Math.random() * 2);
+    }
+    return Math.floor(Math.random() * FIRST_SPECIAL_BREED);
   }
 
   function cowPositions(cow) {
@@ -1139,7 +1173,7 @@
 
   function rotateCow(cow) {
     cow.rotation = (cow.rotation + 1) % 4;
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < cow.offsets.length; i++) {
       const x = cow.offsets[i].x;
       const y = cow.offsets[i].y;
       cow.offsets[i].x = -y;
@@ -1169,24 +1203,30 @@
     }
   }
 
-  function isConflicted(cow) {
+  function isConflicted(cow, ignoreSettledBlocks) {
     const positions = cowPositions(cow);
     for (const p of positions) {
       if (p.x < 0 || p.x >= COLS) return true;
       if (p.y >= ROWS) return true;
-      if (p.y >= 0 && board[p.y][p.x] === 1) return true;
+      if (!ignoreSettledBlocks && p.y >= 0 && board[p.y][p.x] === 1) return true;
     }
     return false;
   }
 
   // ── Drawing with original sprite sheet ──
-  // source.png layout: each row is a breed (0-9), each column set is
+  // source.png layout: each row is a normal breed (0-6), each column set is
   // (block0_rot0, block1_rot0, block2_rot0, block3_rot0, block0_rot1, ...)
   // So sprite x = (blockIndex + 4 * rotation) * BLOCK_SIZE
   //    sprite y = breed * BLOCK_SIZE
 
   function drawCowOnCanvas(context, cow) {
     const positions = cowPositions(cow);
+    if (cow.breed >= FIRST_SPECIAL_BREED) {
+      const p = positions[0];
+      context.drawImage(specialCowImages[cow.breed - FIRST_SPECIAL_BREED],
+        p.x * BLOCK_SIZE, p.y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+      return;
+    }
     for (let i = 0; i < positions.length; i++) {
       const p = positions[i];
       const sx = (i + 4 * cow.rotation) * BLOCK_SIZE;
@@ -1246,12 +1286,20 @@
     // Desktop preview
     previewCtx.fillStyle = 'rgb(221, 204, 187)';
     previewCtx.fillRect(0, 0, 80, 40);
-    previewCtx.drawImage(nextCows, 0, cow.breed * 40, 80, 40, 0, 0, 80, 40);
+    if (cow.breed >= FIRST_SPECIAL_BREED) {
+      previewCtx.drawImage(specialCowImages[cow.breed - FIRST_SPECIAL_BREED], 30, 10, 20, 20);
+    } else {
+      previewCtx.drawImage(nextCows, 0, cow.breed * 40, 80, 40, 0, 0, 80, 40);
+    }
     document.getElementById('breedName').textContent = name;
     // Mobile preview
     previewMCtx.fillStyle = 'rgb(221, 204, 187)';
     previewMCtx.fillRect(0, 0, 80, 40);
-    previewMCtx.drawImage(nextCows, 0, cow.breed * 40, 80, 40, 0, 0, 80, 40);
+    if (cow.breed >= FIRST_SPECIAL_BREED) {
+      previewMCtx.drawImage(specialCowImages[cow.breed - FIRST_SPECIAL_BREED], 30, 10, 20, 20);
+    } else {
+      previewMCtx.drawImage(nextCows, 0, cow.breed * 40, 80, 40, 0, 0, 80, 40);
+    }
     document.getElementById('breedNameM').textContent = name;
   }
 
@@ -1286,7 +1334,7 @@
   }
 
   // ── Row clearing (matching original logic) ──
-  function checkRowCompletions(numZapped) {
+  function checkRowCompletions(numZapped, specialSoundPlayed) {
     numZapped = numZapped || 0;
     let recurse = false;
 
@@ -1301,9 +1349,9 @@
     }
 
     if (recurse) {
-      checkRowCompletions(numZapped + 1);
+      checkRowCompletions(numZapped + 1, specialSoundPlayed);
     } else {
-      rowCompletionsFinished(numZapped);
+      rowCompletionsFinished(numZapped, specialSoundPlayed);
     }
   }
 
@@ -1315,7 +1363,7 @@
     redrawBoard();
   }
 
-  function rowCompletionsFinished(numZapped) {
+  function rowCompletionsFinished(numZapped, specialSoundPlayed) {
     if (numZapped > 0) {
       // Update level
       if (Math.floor((rowsCleared + numZapped) / 10) === level + 1) {
@@ -1326,13 +1374,69 @@
       score += LINE_SCORES[numZapped] * (level + 1);
       rowsCleared += numZapped;
 
-      if (numZapped > 1) {
-        playSound('multirow');
-      } else {
-        playSound('row');
+      if (!specialSoundPlayed) {
+        if (numZapped > 1) {
+          playSound('multirow');
+        } else {
+          playSound('row');
+        }
       }
       updateDisplay();
     }
+  }
+
+  function clearBoardCell(x, y) {
+    if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return;
+    board[y][x] = 0;
+    boardSprites[y][x] = null;
+  }
+
+  function clearHolyCowCell(cow) {
+    const p = cowPositions(cow)[0];
+    clearBoardCell(p.x, p.y);
+  }
+
+  function playSpecialCowAppearanceSound(cow) {
+    if (cow.breed === SPECIAL_BREEDS.MAD) {
+      playSound('madcow');
+    } else if (cow.breed === SPECIAL_BREEDS.HOLY) {
+      playSound('holycow');
+    } else if (cow.breed === SPECIAL_BREEDS.PURPLE) {
+      playSound('purplecow');
+    }
+  }
+
+  function activateSpecialCow(cow) {
+    const p = cowPositions(cow)[0];
+
+    if (cow.breed === SPECIAL_BREEDS.MAD) {
+      for (let y = p.y - 1; y <= p.y + 1; y++) {
+        for (let x = p.x - 1; x <= p.x + 1; x++) {
+          clearBoardCell(x, y);
+        }
+      }
+      playSound('explode');
+      redrawBoard();
+      checkRowCompletions(0, true);
+    } else if (cow.breed === SPECIAL_BREEDS.HOLY) {
+      redrawBoard();
+      checkRowCompletions(0, true);
+    } else {
+      zapRow(p.y);
+      playSound('row');
+      checkRowCompletions(1, true);
+    }
+  }
+
+  function settlePiece() {
+    clearDrop();
+    if (piece.breed >= FIRST_SPECIAL_BREED) {
+      activateSpecialCow(piece);
+    } else {
+      addToBoard(piece);
+      checkRowCompletions();
+    }
+    newPiece();
   }
 
   // ── Core Game Actions (matching original) ──
@@ -1342,14 +1446,17 @@
     const provisional = cloneCow(piece);
     provisional.cy++;
 
-    if (isConflicted(provisional)) {
-      addToBoard(piece);
-      clearDrop();
-      checkRowCompletions();
-      newPiece();
+    if (isConflicted(provisional, piece.breed === SPECIAL_BREEDS.HOLY)) {
+      settlePiece();
     } else {
-      eraseCowOnCanvas(ctx, piece);
-      piece.cy++;
+      if (piece.breed === SPECIAL_BREEDS.HOLY) {
+        piece.cy++;
+        clearHolyCowCell(piece);
+        redrawBoard();
+      } else {
+        eraseCowOnCanvas(ctx, piece);
+        piece.cy++;
+      }
       drawCowOnCanvas(ctx, piece);
     }
   }
@@ -1394,15 +1501,16 @@
     while (true) {
       const provisional = cloneCow(piece);
       provisional.cy++;
-      if (isConflicted(provisional)) break;
-      eraseCowOnCanvas(ctx, piece);
+      if (isConflicted(provisional, piece.breed === SPECIAL_BREEDS.HOLY)) break;
+      if (piece.breed !== SPECIAL_BREEDS.HOLY) eraseCowOnCanvas(ctx, piece);
       piece.cy++;
+      if (piece.breed === SPECIAL_BREEDS.HOLY) {
+        clearHolyCowCell(piece);
+        redrawBoard();
+      }
       drawCowOnCanvas(ctx, piece);
     }
-    addToBoard(piece);
-    clearDrop();
-    checkRowCompletions();
-    newPiece();
+    settlePiece();
   }
 
   function softDrop() {
@@ -1414,24 +1522,24 @@
     piece = cloneCow(nextPiece);
     // Reset center to definition start position
     const def = COW_DEFS[piece.breed];
-    piece.cx = def[0];
-    piece.cy = def[1];
+    piece.cx = def.center[0];
+    piece.cy = def.center[1];
     // Re-clone offsets from definition (reset rotation)
-    piece.offsets = [
-      { x: def[2], y: def[3] },
-      { x: def[4], y: def[5] },
-      { x: def[6], y: def[7] },
-      { x: def[8], y: def[9] },
-    ];
+    piece.offsets = def.offsets.map(([x, y]) => ({ x, y }));
     piece.rotation = 0;
 
-    nextPiece = createCow(Math.floor(Math.random() * 7));
+    nextPiece = createCow(randomCowBreed());
     drawPreview(nextPiece);
 
-    if (isConflicted(piece)) {
+    if (isConflicted(piece, piece.breed === SPECIAL_BREEDS.HOLY)) {
       doGameOver();
     } else {
+      if (piece.breed === SPECIAL_BREEDS.HOLY) {
+        clearHolyCowCell(piece);
+        redrawBoard();
+      }
       drawCowOnCanvas(ctx, piece);
+      playSpecialCowAppearanceSound(piece);
     }
   }
 
@@ -1472,17 +1580,16 @@
     gameOverFlag = false;
     lastHighlightRank = -1;
 
-    piece = createCow(Math.floor(Math.random() * 7));
-    nextPiece = createCow(Math.floor(Math.random() * 7));
+    piece = createCow(randomCowBreed());
+    nextPiece = createCow(randomCowBreed());
 
     drawCowOnCanvas(ctx, piece);
     drawPreview(nextPiece);
+    playSpecialCowAppearanceSound(piece);
 
     updateDisplay();
     startTimer();
     hideOverlays();
-
-    playSound('madcow');
   }
 
   function updateDisplay() {

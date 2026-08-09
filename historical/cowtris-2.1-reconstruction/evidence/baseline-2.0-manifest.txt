@@ -1,0 +1,19 @@
+Cowtris 2.00 published-source baseline
+======================================
+
+These hashes identify the local copy of the published GPL VB6 source used to assign
+source-level names and compare the 2.1 procedure structure. The files themselves are
+not duplicated in this artifact.
+
+5449c0b9df14a483f89f06b9b9c50994bba64e4ca936e3fc38067d71a6712737  game.bas
+e6e6fbae51691f2762b99298c5b9c79eded15c548cc0a13d5d64c9aa6c16a40f  gamestructs.bas
+ccaac79219c3531c4ccdca501279235abe7338e305b0be847d8520057b91629b  audio.bas
+bf88adfb64fefb025555cf2d99e8b62bd9a7d53d899ddf21a2a7af14af07ac98  game.frm
+edb43ec38a0633fbfd10e34fe0c6776eb6ed574ed3bf91bf6163e66c6abb410a  help.frm
+2a6644e2b2ebd6f1f5abcbb12cd41c80476b7570ed0f8961d04c2c97cb7700dc  registry.bas
+
+Version identification from readme.txt:
+  Cowtris 2.00
+  Copyright 2000-2001 David Glick
+  GNU GPL version 2 or later
+
