@@ -10,6 +10,8 @@ A falling block game with cows.
 
 Cowtris was originally coded in Visual Basic by David Glick (davisagli) and published by Nonsense Software circa 2000–2003. NS was four teenagers from Indiana who made computer games, biked, and built model recreations of medieval weaponry. In terms of games, Cowtris was their finest work and its legacy casts the longest shadow.
 
+**Cowtris 2.1** (2003) introduced three rare one-block special cows: Mad Cow blasts the blocks touching it, Holy Cow tunnels through blocks beneath it, and Purple Cow removes its landing row even when the row is incomplete.
+
 **Cowtris 3** (2013) ported the game to HTML5/JavaScript by [Ben Jacobs](https://benbybenjacobs.com), preserving the original sprites, sounds, and gameplay.
 
 **Cowtris 2026** is a complete rewrite as a self-contained, mobile-friendly HTML5 canvas game with a shared online scoreboard. Every line of the 2026 port was generated through a conversational prompt session between Ben and [Claude](https://claude.ai) (Anthropic) — layout, game logic, sprite rendering, API server, and deployment. The original game assets (sprites, sound effects, and MIDI music) are preserved faithfully.
@@ -25,6 +27,7 @@ The current version lives in the `web/` directory:
 ### Features
 
 - Faithful to original game mechanics (no ghost piece, no wall kicks, space = fast advance)
+- Mad, Holy, and Purple special cows with their original rarity, behavior, sprites, and sounds
 - Original cow breed sprites and sound effects
 - Background music from original MIDI tracks (18 shuffled tracks)
 - Responsive side-by-side layout that works on mobile and desktop
@@ -49,6 +52,8 @@ The entire 2026 port was built in a single Claude Code session. Ben described wh
 ## Archive
 
 The original 2013 HTML5 port and all historical assets (VB-era sprites, MIDI files, sounds) are preserved in the `archive/` directory. See [archive/readme-2.1.md](archive/readme-2.1.md) for the original Nonsense Software description.
+
+A provenance-focused [Cowtris 2.1 reference reconstruction](historical/cowtris-2.1-reconstruction/README.md) documents the special-cow mechanics recovered from the shipped VB6 executable. It includes readable VB-style pseudocode, p-code evidence, a sound-resource manifest, and a reproducible inspection tool; it is intentionally not presented as original or compilable source.
 
 ## License
 

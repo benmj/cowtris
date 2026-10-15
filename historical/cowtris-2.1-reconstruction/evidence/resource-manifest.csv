@@ -1,0 +1,17 @@
+resource_id,size_bytes,sha256,reference_name,archive_match
+101,125480,f6b8affddc26cb1527cddc9d12dd9c5f7af48496dc44c4b62cce7ef377b83413,madcow.wav,"semantic ID match; archived file differs"
+102,3300,7c67f3013a1e86e396aca8e55aa29a0028e1b2e6ca5329bd0dc53ed6dd6236b6,Zap.wav,exact
+103,10820,df422928d9af1c9eaa84d38b43bebeecb3169c765d7a2f19e0474681003fcb71,Zap2.wav,"archived file plus 2 resource-padding bytes"
+104,16444,f80fc6a66f39c5e8526edc1290f0d9f12dab1bbca1cf4bd52e84e298ed407593,Cow.wav,exact
+105,46452,1ad9f40cc27065ff8b7fc01fd55f53d5e8e1bd10773b1f316aa62e701a260d2f,game-over sound,"archived Die.wav differs"
+106,45228,c4792ef21afb3d9edbd012ab2f04181d5ca261cd1c05825920f5d56fa4786450,Mad2back.wav,exact
+107,130092,be74549745f1f0072dcfb0e37031aa46d00b1dc856252900a254caf990bb5e68,monks cow 2.wav,exact
+108,43052,edbb5a2a581040b8b90add328c4f7d8db795ad80dc7d58fb3e2e24d99092f83d,purple.wav,"archived file plus 2 resource-padding bytes"
+109,24200,dff82b8d17960c7bd9a28a2b032f4161549f8d2c462d97e763c4f91c4db83564,EXPLODE.WAV,"archived file plus 2 resource-padding bytes"
+110,28324,62ef936823c9e91c55acde5fa73e350f1bac8c2ab9132b7249482ece91a3caec,violence.wav,exact
+111,51756,895835e17074214d778b207f1a57e21958ed5e3b346cabf0e346df8dbbfebf94,lavache.wav,exact
+112,2152,6662b9ebab649501c6b3817c2c89db13cb1c4571ff2d773c4d0f00c7bc0edcca,ni.wav,"archived file plus 2 resource-padding bytes"
+113,24024,b0642ad217cd9c97f234c75b99453b91f6f16ecd77c821f65295cfd77810d0b5,represd.wav,exact
+114,18244,f40fcde9afc717ec2e4b28e39145ac9c40ab97860bcfd51533284568794ffda7,bitelegs.wav,exact
+115,58412,b257fa81638a19c05d84a98f030c50b8a0a141b9c5f48ff367aa6362c0f63124,hamster.wav,exact
+

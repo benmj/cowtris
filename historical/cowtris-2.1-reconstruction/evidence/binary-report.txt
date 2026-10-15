@@ -1,0 +1,52 @@
+Cowtris 2.1 binary inspection report
+=====================================
+file: Cowtris.exe
+size: 1404928 bytes
+sha256: 4b74269713b7e70b6280a179d1a00399e4b345d92d1fa99db80e6b5e00cbf1df
+PE timestamp: 2003-06-04T03:01:20+00:00
+image base: 0x00400000
+entry point: 0x0040113c
+VB header: 0x0040126c
+valid p-code procedures found: 76
+PlaySound descriptor: 0x00412c48
+PlaySound thunk: 0x00401530
+
+Calls to PlaySound with literal resource IDs
+--------------------------------------------
+0x00415697  resource 102  modGame.method[2]  descriptor=0x004158a8  CheckForRowCompletion
+0x004156cb  resource 103  modGame.method[2]  descriptor=0x004158a8  CheckForRowCompletion
+0x004156ff  resource 103  modGame.method[2]  descriptor=0x004158a8  CheckForRowCompletion
+0x00415733  resource 103  modGame.method[2]  descriptor=0x004158a8  CheckForRowCompletion
+0x004157e3  resource 101  modGame.method[2]  descriptor=0x004158a8  CheckForRowCompletion
+0x00415836  resource 104  modGame.method[2]  descriptor=0x004158a8  CheckForRowCompletion
+0x004169f6  resource 101  modGame.method[4]  descriptor=0x00416a48  BeginPiece
+0x00416a11  resource 107  modGame.method[4]  descriptor=0x00416a48  BeginPiece
+0x00416a2c  resource 108  modGame.method[4]  descriptor=0x00416a48  BeginPiece
+0x00414bf3  resource 109  modGame.method[6]  descriptor=0x00414d84  TransPiece / special landing effects
+0x00414d7c  resource 102  modGame.method[6]  descriptor=0x00414d84  TransPiece / special landing effects
+0x00413e3b  resource 105  modGame.method[9]  descriptor=0x00413fb8  unidentified
+0x0041254f  resource 101  modMain.method[0]  descriptor=0x00412584  Sub Main
+0x00411e45  resource 106  modMain.method[1]  descriptor=0x00411e50  EndProgram
+
+Embedded WAVE resources
+-----------------------
+101  125480 bytes  f6b8affddc26cb1527cddc9d12dd9c5f7af48496dc44c4b62cce7ef377b83413  madcow.wav
+102    3300 bytes  7c67f3013a1e86e396aca8e55aa29a0028e1b2e6ca5329bd0dc53ed6dd6236b6  Zap.wav (exact)
+103   10820 bytes  df422928d9af1c9eaa84d38b43bebeecb3169c765d7a2f19e0474681003fcb71  Zap2.wav (plus resource padding)
+104   16444 bytes  f80fc6a66f39c5e8526edc1290f0d9f12dab1bbca1cf4bd52e84e298ed407593  Cow.wav (exact)
+105   46452 bytes  1ad9f40cc27065ff8b7fc01fd55f53d5e8e1bd10773b1f316aa62e701a260d2f  game-over sound
+106   45228 bytes  c4792ef21afb3d9edbd012ab2f04181d5ca261cd1c05825920f5d56fa4786450  Mad2back.wav (exact)
+107  130092 bytes  be74549745f1f0072dcfb0e37031aa46d00b1dc856252900a254caf990bb5e68  monks cow 2.wav (exact)
+108   43052 bytes  edbb5a2a581040b8b90add328c4f7d8db795ad80dc7d58fb3e2e24d99092f83d  purple.wav (plus resource padding)
+109   24200 bytes  dff82b8d17960c7bd9a28a2b032f4161549f8d2c462d97e763c4f91c4db83564  EXPLODE.WAV (plus resource padding)
+110   28324 bytes  62ef936823c9e91c55acde5fa73e350f1bac8c2ab9132b7249482ece91a3caec  violence.wav (exact)
+111   51756 bytes  895835e17074214d778b207f1a57e21958ed5e3b346cabf0e346df8dbbfebf94  lavache.wav (exact)
+112    2152 bytes  6662b9ebab649501c6b3817c2c89db13cb1c4571ff2d773c4d0f00c7bc0edcca  ni.wav (plus resource padding)
+113   24024 bytes  b0642ad217cd9c97f234c75b99453b91f6f16ecd77c821f65295cfd77810d0b5  represd.wav (exact)
+114   18244 bytes  f40fcde9afc717ec2e4b28e39145ac9c40ab97860bcfd51533284568794ffda7  bitelegs.wav (exact)
+115   58412 bytes  b257fa81638a19c05d84a98f030c50b8a0a141b9c5f48ff367aa6362c0f63124  hamster.wav (exact)
+
+Special-cow selection procedure
+-------------------------------
+descriptor=0x00412698 p-code=0x00412640..0x00412698
+27 54 ff 0a 1b 00 04 00 f4 64 eb b3 f4 01 eb ab e5 70 76 ff 35 54 ff 6b 76 ff f4 05 da 75 1c 00 c3 c5 1c 3f 00 27 54 ff 0a 1b 00 04 00 f4 06 eb b3 e5 f4 01 a9 e7 71 78 ff 35 54 ff 1e 56 00 27 54 ff 0a 1b 00 04 00 f4 02 eb b3 e5 f4 08 a9 e7 71 78 ff 35 54 ff 14 00

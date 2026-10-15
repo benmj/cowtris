@@ -1,0 +1,35 @@
+Cowtris 2.1 UI and help strings
+===============================
+
+Status: confirmed embedded strings, except where noted.
+
+Options menu
+------------
+
+Use Special &Cows
+
+The ampersand marks the keyboard mnemonic in a VB menu caption. The p-code selection
+helper also reads a Boolean gate before it permits breeds 8 through 10. The original
+variable and event-handler names are not retained and are therefore inferred in the
+VB-style reconstruction.
+
+Instructions
+------------
+
+Mad Cow, Holy cow, and Purple Cow:
+From time to time, these special one-block cows will appear
+and perform unique tasks:
+Mad Cow: Destroys all blocks touching it when it lands
+Holy Cow: Falls through other blocks, destroying them
+Purple Cow: Removes the row it lands in, even if it isn't 
+complete
+
+Notes
+-----
+
+- Capitalization and line breaks above follow the executable's embedded strings.
+- "Touching" is implemented as the eight surrounding cells of the Mad Cow's 3x3
+  neighborhood; the center cell containing the Mad Cow is cleared as well.
+- The modern port intentionally phrases the Holy Cow description as “tunnels a hole
+  through blocks” to make the hole/holy pun explicit.
+
